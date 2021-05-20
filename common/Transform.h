@@ -4,9 +4,9 @@
 #include "../math/Vector2.h"
 
 struct Transform {
-    Vector2 position;
+    Vector2 linear;
 #ifdef USE_ROTATION
-    real rotation;
+    real angular;
 #endif
 };
 

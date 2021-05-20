@@ -6,8 +6,13 @@
 struct Polygon
 {
     int count;
-    Vector2[] sides;
-    Vector2[] normals;
+    Vector2* sides;
+    Vector2* normals;
+    ~Polygon()
+    {
+        delete[] sides;
+        delete[] normals;
+    };
 };
 
 #endif //ADJUSTABLEPHYSICS2D_POLYGON_H
