@@ -3,12 +3,12 @@
 
 #include "ecs/Context.h"
 #include "ecs/systems/System.h"
+#include "ecs/systems/SystemType.h"
 
 class PhysicsEngine {
 private:
     Context context;
-    static const size_t systemsCount = 1;
-    System* systems[systemsCount];
+    System* systems[SystemsCount];
 public:
     explicit PhysicsEngine(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
     void simulate(real deltaTime);

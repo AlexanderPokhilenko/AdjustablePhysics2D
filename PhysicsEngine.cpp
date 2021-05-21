@@ -3,7 +3,7 @@
 
 PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
 systems() {
-    systems[0] = new MoveSystem();
+    systems[static_cast<std::size_t>(SystemType::MoveSystem)] = new MoveSystem();
 }
 
 void PhysicsEngine::simulate(real deltaTime) {
