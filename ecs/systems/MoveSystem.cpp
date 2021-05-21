@@ -25,9 +25,9 @@ void MoveSystem::update(Context &context, EntityId id, real deltaTime) {
 #elif defined(USE_RK4)
     real halfStep = deltaTime / 2;
     Transform k1 = velocity;
-    Transform k2 = k1 + velocity * halfStep;
-    Transform k3 = k2 + velocity * halfStep;
-    Transform k4 = k3 + velocity * deltaTime;
+    Transform k2 = velocity + acceleration * halfStep;
+    Transform k3 = velocity + acceleration * halfStep;
+    Transform k4 = velocity + acceleration * deltaTime;
 
     location += (k1 + (k2 + k3) * 2 + k4) * (deltaTime / 6);
     velocity += acceleration * deltaTime;
