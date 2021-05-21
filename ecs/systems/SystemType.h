@@ -6,6 +6,9 @@ enum class SystemType {
 #ifdef USE_GLOBAL_GRAVITATION
     GlobalGravitation,
 #endif
+#ifdef USE_GRAVITATIONAL_FORCE
+    GravitationalForce,
+#endif
     COUNT
 };
 

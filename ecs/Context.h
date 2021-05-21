@@ -20,6 +20,8 @@ private:
     const ComponentContainer<T>* getComponents() const;
 public:
     explicit Context(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
+    size_t getEntitiesSize();
+    bool checkEntity(EntityId id, ComponentsBitset bitset);
     EntityId createEntity();
     void deleteEntity(EntityId id);
     template<typename T>

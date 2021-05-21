@@ -4,9 +4,8 @@
 #include "../Context.h"
 
 class System {
-private:
-    const ComponentsBitset componentsBitset;
 protected:
+    const ComponentsBitset componentsBitset;
     virtual void update(Context& context, EntityId id, real deltaTime) = 0;
 public:
     explicit System(ComponentsBitset componentsBitset = ComponentsBitset());

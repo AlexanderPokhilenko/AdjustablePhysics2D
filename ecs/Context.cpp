@@ -12,6 +12,14 @@ Context::Context(size_t entitiesCapacity, size_t freeCapacity) : freeIds(freeCap
     components[static_cast<std::size_t>(ComponentType::Force)] = new ComponentContainer<ForceComponent>(entitiesCapacity);
 }
 
+size_t Context::getEntitiesSize() {
+    return inUse.size();
+}
+
+bool Context::checkEntity(EntityId id, ComponentsBitset bitset) {
+    return (inUse[id] & bitset) == bitset;
+}
+
 EntityId Context::createEntity() {
     EntityId id;
     if(freeIds.empty()) {
@@ -26,6 +34,7 @@ EntityId Context::createEntity() {
 }
 
 void Context::deleteEntity(EntityId id) {
+    inUse[id].reset();
     freeIds.push_back(id);
 }
 
