@@ -16,8 +16,10 @@ struct Vector2 {
     void normalize();
 
     Vector2 operator -() const;
-    Vector2 operator +(Vector2 second) const;
-    Vector2 operator -(Vector2 second) const;
+    Vector2 operator +(const Vector2& second) const;
+    Vector2 operator -(const Vector2& second) const;
+    Vector2& operator +=(const Vector2& right);
+    Vector2& operator -=(const Vector2& right);
     Vector2 operator *(real k) const;
     Vector2 operator /(real k) const;
 };

@@ -15,11 +15,17 @@ private:
     std::vector<ComponentsBitset> inUse;
     BaseComponentContainer* components[ComponentsCount];
     template<typename T>
-    ComponentContainer<T> getComponents();
+    ComponentContainer<T>* getComponents();
+    template<typename T>
+    const ComponentContainer<T>* getComponents() const;
 public:
     explicit Context(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
     EntityId createEntity();
     void deleteEntity(EntityId id);
+    template<typename T>
+    T& getComponent(EntityId id);
+    template<typename T>
+    const T& getComponent(EntityId id) const;
     template<typename T, typename... Args>
     void addComponent(EntityId id, Args&&... args);
     template<typename T>

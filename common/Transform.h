@@ -8,6 +8,14 @@ struct Transform {
 #ifdef USE_ROTATION
     real angular;
 #endif
+
+    Transform operator -() const;
+    Transform operator +(const Transform& second) const;
+    Transform operator -(const Transform& second) const;
+    Transform& operator +=(const Transform& right);
+    Transform& operator -=(const Transform& right);
+    Transform operator *(real k) const;
+    Transform operator /(real k) const;
 };
 
 #endif //ADJUSTABLEPHYSICS2D_TRANSFORM_H

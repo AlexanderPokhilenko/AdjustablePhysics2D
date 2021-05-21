@@ -1,22 +1,6 @@
 #include "Vector2.h"
 #include <cmath>
 
-Vector2 Vector2::operator+(const Vector2 second) const {
-    return {x + second.x, y + second.y};
-}
-
-Vector2 Vector2::operator-(const Vector2 second) const {
-    return {x - second.x, y - second.y};
-}
-
-Vector2 Vector2::operator*(real k) const {
-    return {x * k, y * k};
-}
-
-Vector2 Vector2::operator/(real k) const {
-    return {x / k, y / k};
-}
-
 real Vector2::dotProduct(const Vector2 first, const Vector2 second) {
     return first.x * second.x + first.y * second.y;
 }
@@ -50,6 +34,34 @@ void Vector2::normalize() {
     y /= magnitude;
 }
 
+Vector2 Vector2::operator+(const Vector2& second) const {
+    return {x + second.x, y + second.y};
+}
+
+Vector2 Vector2::operator-(const Vector2& second) const {
+    return {x - second.x, y - second.y};
+}
+
+Vector2 Vector2::operator*(real k) const {
+    return {x * k, y * k};
+}
+
+Vector2 Vector2::operator/(real k) const {
+    return {x / k, y / k};
+}
+
 Vector2 Vector2::operator-() const {
     return {-x, -y};
+}
+
+Vector2& Vector2::operator+=(const Vector2& right) {
+    x += right.x;
+    y += right.y;
+    return *this;
+}
+
+Vector2& Vector2::operator-=(const Vector2& right) {
+    x -= right.x;
+    y -= right.y;
+    return *this;
 }

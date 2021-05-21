@@ -12,7 +12,7 @@ private:
     std::vector<T> components;
 public:
     explicit ComponentContainer(std::size_t capacity = 64);
-    T& get(EntityId entity);
+    T& get(EntityId id);
     const T& get(EntityId id) const;
     template<typename... Args>
     void add(EntityId id, Args&&... args);

@@ -30,14 +30,29 @@ void Context::deleteEntity(EntityId id) {
 }
 
 template<typename T>
-ComponentContainer<T> Context::getComponents() {
-    return static_cast<ComponentContainer<T>>(components[T::type]);
+ComponentContainer<T> *Context::getComponents() {
+    return static_cast<ComponentContainer<T>*>(components[T::type]);
+}
+
+template<typename T>
+const ComponentContainer<T> *Context::getComponents() const {
+    return static_cast<ComponentContainer<T>*>(components[T::type]);
+}
+
+template<typename T>
+T &Context::getComponent(EntityId id) {
+    return getComponents<T>()->get(id);
+}
+
+template<typename T>
+const T &Context::getComponent(EntityId id) const {
+    return getComponents<T>()->get(id);
 }
 
 template<typename T, typename... Args>
 void Context::addComponent(EntityId id, Args &&... args) {
-    getComponents<T>().add(id, args...);
-    inUse[id].set(T::type, true);
+    getComponents<T>()->add(id, args...);
+    inUse[id].set(T::type);
 }
 
 template<typename T>
