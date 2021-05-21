@@ -13,6 +13,7 @@ enum class ComponentType {
     COUNT
 };
 
-using ComponentsBitset = std::bitset<static_cast<std::size_t>(ComponentType::COUNT)>;
+const std::size_t ComponentsCount = static_cast<std::size_t>(ComponentType::COUNT);
+using ComponentsBitset = std::bitset<ComponentsCount>;
 
 #endif //ADJUSTABLEPHYSICS2D_COMPONENTTYPE_H

@@ -11,6 +11,7 @@ protected:
 public:
     explicit System(ComponentsBitset componentsBitset = ComponentsBitset());
     void update(Context& context, real deltaTime);
-    virtual ~System() = 0;
+    virtual ~System() = default;
 };
+
 #endif //ADJUSTABLEPHYSICS2D_SYSTEM_H

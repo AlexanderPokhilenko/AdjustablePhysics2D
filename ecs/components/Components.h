@@ -9,27 +9,27 @@
 #include "Component.h"
 #include "ComponentType.h"
 
-struct ShapeComponent : Shape, Component<Shape, ComponentType::Shape>
+struct ShapeComponent : Shape, Component<ShapeComponent, ComponentType::Shape>
 { };
 
-struct MassInfoComponent : MassInfo, Component<MassInfo, ComponentType::MassInfo>
+struct MassInfoComponent : MassInfo, Component<MassInfoComponent, ComponentType::MassInfo>
 { };
 
-struct MaterialComponent : Material, Component<Material, ComponentType::Material>
+struct MaterialComponent : Material, Component<MaterialComponent, ComponentType::Material>
 { };
 
-struct PolygonComponent : Polygon, Component<Polygon, ComponentType::Polygon>
+struct PolygonComponent : Polygon, Component<PolygonComponent, ComponentType::Polygon>
 { };
 
-struct LocationComponent : Transform, Component<Transform, ComponentType::Location>
+struct LocationComponent : Transform, Component<LocationComponent, ComponentType::Location>
 { };
 
-struct VelocityComponent : Transform, Component<Transform, ComponentType::Velocity>
+struct VelocityComponent : Transform, Component<VelocityComponent, ComponentType::Velocity>
 { };
 
-struct AccelerationComponent : Transform, Component<Transform, ComponentType::Acceleration>
+struct AccelerationComponent : Transform, Component<AccelerationComponent, ComponentType::Acceleration>
 { };
 
-struct ForceComponent : Transform, Component<Transform, ComponentType::Force>
+struct ForceComponent : Transform, Component<ForceComponent, ComponentType::Force>
 { };
 #endif //ADJUSTABLEPHYSICS2D_COMPONENTS_H

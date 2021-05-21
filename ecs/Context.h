@@ -6,22 +6,25 @@
 #include "../base/primitives.h"
 #include "components/Components.h"
 #include "components/ComponentType.h"
+#include "components/ComponentContainer.h"
 
 class Context {
 friend class System;
 private:
-    const std::vector<EntityId> freeIds;
-    const std::vector<ComponentsBitset> inUse;
-    const std::vector<ShapeComponent> shapes;
-    const std::vector<MassInfoComponent> masses;
-    const std::vector<MaterialComponent> materials;
-    const std::vector<PolygonComponent> polygons;
-    const std::vector<LocationComponent> locations;
-    const std::vector<VelocityComponent> velocities;
-    const std::vector<AccelerationComponent> accelerations;
-    const std::vector<ForceComponent> forces;
+    std::vector<EntityId> freeIds;
+    std::vector<ComponentsBitset> inUse;
+    BaseComponentContainer* components[ComponentsCount];
+    template<typename T>
+    ComponentContainer<T> getComponents();
 public:
     explicit Context(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
+    EntityId createEntity();
+    void deleteEntity(EntityId id);
+    template<typename T, typename... Args>
+    void addComponent(EntityId id, Args&&... args);
+    template<typename T>
+    void removeComponent(EntityId id);
+    ~Context();
 };
 
 #endif //ADJUSTABLEPHYSICS2D_CONTEXT_H
