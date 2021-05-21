@@ -2,7 +2,10 @@
 #define ADJUSTABLEPHYSICS2D_SYSTEMTYPE_H
 
 enum class SystemType {
-    MoveSystem,
+    Move,
+#ifdef USE_GLOBAL_GRAVITATION
+    GlobalGravitation,
+#endif
     COUNT
 };
 
