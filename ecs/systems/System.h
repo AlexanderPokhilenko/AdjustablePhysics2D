@@ -9,7 +9,7 @@ protected:
     virtual void update(Context& context, EntityId id, real deltaTime) = 0;
 public:
     explicit System(ComponentsBitset componentsBitset = ComponentsBitset());
-    void update(Context& context, real deltaTime);
+    virtual void update(Context& context, real deltaTime);
     virtual ~System() = default;
 };
 

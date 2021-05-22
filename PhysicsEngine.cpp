@@ -7,6 +7,9 @@
 #include "ecs/systems/GravitationalForceSystem.h"
 #endif
 #include "ecs/systems/ShapeTranslationSystem.h"
+#ifdef USE_BROAD_PHASE
+#include "ecs/systems/BroadPhaseSystem.h"
+#endif
 
 PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
 systems() {
@@ -18,6 +21,9 @@ systems() {
     systems[static_cast<std::size_t>(SystemType::GravitationalForce)] = new GravitationalForceSystem();
 #endif
     systems[static_cast<std::size_t>(SystemType::ShapeTranslation)] = new ShapeTranslationSystem();
+#ifdef USE_BROAD_PHASE
+    systems[static_cast<std::size_t>(SystemType::BroadPhase)] = new BroadPhaseSystem();
+#endif
 }
 
 void PhysicsEngine::simulate(real deltaTime) {

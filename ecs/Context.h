@@ -10,10 +10,16 @@
 
 class Context {
 friend class System;
+#ifdef USE_BROAD_PHASE
+friend class BroadPhaseSystem;
+#endif
 private:
     std::vector<EntityId> freeIds;
     std::vector<ComponentsBitset> inUse;
     BaseComponentContainer* components[ComponentsCount];
+#if USE_BROAD_PHASE
+    std::vector<std::pair<EntityId, EntityId>> possibleCollisions;
+#endif
     template<typename T>
     ComponentContainer<T>* getComponents();
     template<typename T>

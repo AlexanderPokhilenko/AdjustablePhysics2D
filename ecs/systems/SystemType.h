@@ -10,6 +10,9 @@ enum class SystemType {
     GravitationalForce,
 #endif
     ShapeTranslation,
+#ifdef USE_BROAD_PHASE
+    BroadPhase,
+#endif
     COUNT
 };
 

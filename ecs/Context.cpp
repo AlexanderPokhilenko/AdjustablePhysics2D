@@ -2,6 +2,9 @@
 
 Context::Context(size_t entitiesCapacity, size_t freeCapacity) : freeIds(freeCapacity), inUse(entitiesCapacity), components()
 {
+#if USE_BROAD_PHASE
+    possibleCollisions.reserve(entitiesCapacity);
+#endif
     components[static_cast<std::size_t>(ComponentType::Shape)] = new ComponentContainer<ShapeComponent>(entitiesCapacity);
     components[static_cast<std::size_t>(ComponentType::MassInfo)] = new ComponentContainer<MassInfoComponent>(entitiesCapacity);
     components[static_cast<std::size_t>(ComponentType::Material)] = new ComponentContainer<MaterialComponent>(entitiesCapacity);
