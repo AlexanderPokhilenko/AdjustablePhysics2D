@@ -6,6 +6,7 @@
 #ifdef USE_GRAVITATIONAL_FORCE
 #include "ecs/systems/GravitationalForceSystem.h"
 #endif
+#include "ecs/systems/ShapeTranslationSystem.h"
 
 PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
 systems() {
@@ -16,6 +17,7 @@ systems() {
 #ifdef USE_GRAVITATIONAL_FORCE
     systems[static_cast<std::size_t>(SystemType::GravitationalForce)] = new GravitationalForceSystem();
 #endif
+    systems[static_cast<std::size_t>(SystemType::ShapeTranslation)] = new ShapeTranslationSystem();
 }
 
 void PhysicsEngine::simulate(real deltaTime) {

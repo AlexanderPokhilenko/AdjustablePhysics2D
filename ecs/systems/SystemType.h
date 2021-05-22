@@ -9,6 +9,7 @@ enum class SystemType {
 #ifdef USE_GRAVITATIONAL_FORCE
     GravitationalForce,
 #endif
+    ShapeTranslation,
     COUNT
 };
 

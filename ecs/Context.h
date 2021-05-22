@@ -25,6 +25,8 @@ public:
     EntityId createEntity();
     void deleteEntity(EntityId id);
     template<typename T>
+    bool hasComponent(EntityId id);
+    template<typename T>
     T& getComponent(EntityId id);
     template<typename T>
     const T& getComponent(EntityId id) const;

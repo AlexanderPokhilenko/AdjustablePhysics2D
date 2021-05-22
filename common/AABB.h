@@ -6,6 +6,13 @@
 struct AABB {
     Vector2 min;
     Vector2 max;
+
+    Vector2 getCenter() const;
+
+    AABB operator +(const Vector2& vector) const;
+    AABB operator -(const Vector2& vector) const;
+    AABB& operator +=(const Vector2& vector);
+    AABB& operator -=(const Vector2& vector);
 };
 
 #endif //ADJUSTABLEPHYSICS2D_AABB_H

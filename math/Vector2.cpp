@@ -34,6 +34,37 @@ void Vector2::normalize() {
     y /= magnitude;
 }
 
+Vector2 Vector2::getRotated(real angle) const {
+    real sinVal, cosVal;
+#ifdef DOUBLE_PRECISION
+    sinVal = sin(angle);
+    cosVal = cos(angle);
+#else
+    sinVal = sinf(angle);
+    cosVal = cosf(angle);
+#endif
+    return {
+        x * cosVal - y * sinVal,
+        x * sinVal + y * cosVal
+    };
+}
+
+void Vector2::rotate(real angle) {
+    real sinVal, cosVal;
+#ifdef DOUBLE_PRECISION
+    sinVal = sin(angle);
+    cosVal = cos(angle);
+#else
+    sinVal = sinf(angle);
+    cosVal = cosf(angle);
+#endif
+    real newX = x * cosVal - y * sinVal;
+    real newY = x * sinVal + y * cosVal;
+
+    x = newX;
+    y = newY;
+}
+
 Vector2 Vector2::operator+(const Vector2& second) const {
     return {x + second.x, y + second.y};
 }

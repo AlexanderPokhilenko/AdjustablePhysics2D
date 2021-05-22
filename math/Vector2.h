@@ -14,6 +14,8 @@ struct Vector2 {
     real getSqrMagnitude() const;
     Vector2 getNormalized() const;
     void normalize();
+    Vector2 getRotated(real angle) const;
+    void rotate(real angle);
 
     Vector2 operator -() const;
     Vector2 operator +(const Vector2& second) const;
