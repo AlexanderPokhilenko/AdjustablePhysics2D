@@ -12,11 +12,11 @@ AABB Polygon::getAABB(real angle) const {
     Vector2 max = {0, 0};
 
     for (int i = 0; i < count; ++i) {
-        auto side = sides[i].getRotated(angle);
-        if(side.x < min.x) min.x = side.x;
-        if(side.x > max.x) max.x = side.x;
-        if(side.y < min.y) min.y = side.y;
-        if(side.y > max.y) max.y = side.y;
+        auto edge = edges[i].getRotated(angle);
+        if(edge.x < min.x) min.x = edge.x;
+        if(edge.x > max.x) max.x = edge.x;
+        if(edge.y < min.y) min.y = edge.y;
+        if(edge.y > max.y) max.y = edge.y;
     }
 
     return {min, max};
@@ -28,7 +28,7 @@ real Polygon::getRadius() const {
     real maxSqr = 0;
 
     for (int i = 0; i < count; ++i) {
-        auto current = sides[i].getSqrMagnitude();
+        auto current = edges[i].getSqrMagnitude();
         if(current > maxSqr) maxSqr = current;
     }
 
@@ -42,6 +42,6 @@ real Polygon::getRadius() const {
 
 Polygon::~Polygon()
 {
-    delete[] sides;
+    delete[] edges;
     delete[] normals;
 }

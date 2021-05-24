@@ -10,6 +10,7 @@
 #ifdef USE_BROAD_PHASE
 #include "ecs/systems/BroadPhaseSystem.h"
 #endif
+#include "ecs/systems/NarrowPhaseSystem.h"
 
 PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
 systems() {
@@ -24,6 +25,7 @@ systems() {
 #ifdef USE_BROAD_PHASE
     systems[static_cast<std::size_t>(SystemType::BroadPhase)] = new BroadPhaseSystem();
 #endif
+    systems[static_cast<std::size_t>(SystemType::NarrowPhase)] = new NarrowPhaseSystem();
 }
 
 void PhysicsEngine::simulate(real deltaTime) {

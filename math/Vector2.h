@@ -7,8 +7,8 @@ struct Vector2 {
     real x;
     real y;
 
-    static real dotProduct(Vector2 first, Vector2 second);
-    static real crossProduct(Vector2 first, Vector2 second);
+    static real dotProduct(const Vector2& first, const Vector2& second);
+    static real crossProduct(const Vector2& first, const Vector2& second);
 
     real getMagnitude() const;
     real getSqrMagnitude() const;
@@ -17,6 +17,7 @@ struct Vector2 {
     Vector2 getRotated(real angle) const;
     void rotate(real angle);
 
+    bool operator ==(const Vector2& right) const;
     Vector2 operator -() const;
     Vector2 operator +(const Vector2& second) const;
     Vector2 operator -(const Vector2& second) const;

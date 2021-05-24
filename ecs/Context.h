@@ -7,12 +7,14 @@
 #include "components/Components.h"
 #include "components/ComponentType.h"
 #include "components/ComponentContainer.h"
+#include "../common/Collision.h"
 
 class Context {
 friend class System;
 #ifdef USE_BROAD_PHASE
 friend class BroadPhaseSystem;
 #endif
+friend class NarrowPhaseSystem;
 private:
     std::vector<EntityId> freeIds;
     std::vector<ComponentsBitset> inUse;
@@ -20,6 +22,7 @@ private:
 #if USE_BROAD_PHASE
     std::vector<std::pair<EntityId, EntityId>> possibleCollisions;
 #endif
+    std::vector<Collision> collisions;
     template<typename T>
     ComponentContainer<T>* getComponents();
     template<typename T>

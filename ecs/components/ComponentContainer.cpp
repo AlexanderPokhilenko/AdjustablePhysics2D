@@ -1,7 +1,9 @@
 #include "ComponentContainer.h"
 
 template<typename T>
-ComponentContainer<T>::ComponentContainer(std::size_t capacity) : components(capacity) { }
+ComponentContainer<T>::ComponentContainer(std::size_t capacity) : components() {
+    components.reserve(capacity);
+}
 
 template<typename T>
 T &ComponentContainer<T>::get(EntityId id) {

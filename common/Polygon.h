@@ -9,7 +9,7 @@
 struct Polygon
 {
     int count;
-    Vector2* sides;
+    Vector2* edges;
     Vector2* normals;
 #ifndef USE_CIRCLES_ONLY
     AABB getAABB(real angle = 0) const;

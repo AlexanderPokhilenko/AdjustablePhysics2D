@@ -1,11 +1,11 @@
 #include "Vector2.h"
 #include <cmath>
 
-real Vector2::dotProduct(const Vector2 first, const Vector2 second) {
+real Vector2::dotProduct(const Vector2 &first, const Vector2 &second) {
     return first.x * second.x + first.y * second.y;
 }
 
-real Vector2::crossProduct(const Vector2 first, const Vector2 second) {
+real Vector2::crossProduct(const Vector2 &first, const Vector2 &second) {
     return first.x * second.y - first.y * second.x;
 }
 
@@ -83,6 +83,10 @@ Vector2 Vector2::operator/(real k) const {
 
 Vector2 Vector2::operator-() const {
     return {-x, -y};
+}
+
+bool Vector2::operator==(const Vector2 &right) const {
+    return x == right.x && y == right.y;
 }
 
 Vector2& Vector2::operator+=(const Vector2& right) {

@@ -8,6 +8,8 @@ struct AABB {
     Vector2 max;
 
     Vector2 getCenter() const;
+    Vector2 getSize() const;
+    Vector2 getHalfSize() const;
 
     AABB operator +(const Vector2& vector) const;
     AABB operator -(const Vector2& vector) const;

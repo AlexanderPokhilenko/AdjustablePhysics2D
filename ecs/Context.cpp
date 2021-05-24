@@ -1,10 +1,13 @@
 #include "Context.h"
 
-Context::Context(size_t entitiesCapacity, size_t freeCapacity) : freeIds(freeCapacity), inUse(entitiesCapacity), components()
+Context::Context(size_t entitiesCapacity, size_t freeCapacity) : freeIds(), inUse(), components()
 {
+    freeIds.reserve(freeCapacity);
+    inUse.reserve(entitiesCapacity);
 #if USE_BROAD_PHASE
     possibleCollisions.reserve(entitiesCapacity);
 #endif
+    collisions.reserve(entitiesCapacity);
     components[static_cast<std::size_t>(ComponentType::Shape)] = new ComponentContainer<ShapeComponent>(entitiesCapacity);
     components[static_cast<std::size_t>(ComponentType::MassInfo)] = new ComponentContainer<MassInfoComponent>(entitiesCapacity);
     components[static_cast<std::size_t>(ComponentType::Material)] = new ComponentContainer<MaterialComponent>(entitiesCapacity);

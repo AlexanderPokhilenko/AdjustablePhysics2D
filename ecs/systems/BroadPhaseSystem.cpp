@@ -173,7 +173,11 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
         if(size < 2) continue;
         for (int e1 = 0; e1 < size; ++e1) {
             for (int e2 = e1 + 1; e2 < size; ++e2) {
-                set.insert(std::make_pair(e1, e2));
+                if(e1 < e2) {
+                    set.insert(std::make_pair(e1, e2));
+                } else {
+                    set.insert(std::make_pair(e2, e1));
+                }
             }
         }
     }

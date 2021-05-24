@@ -13,6 +13,7 @@ enum class SystemType {
 #ifdef USE_BROAD_PHASE
     BroadPhase,
 #endif
+    NarrowPhase,
     COUNT
 };
 
