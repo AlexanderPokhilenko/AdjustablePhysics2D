@@ -13,9 +13,9 @@ MoveSystem::MoveSystem() : System(createCurrentSystemBitset())
 { }
 
 void MoveSystem::update(Context &context, EntityId id, real deltaTime) {
-    auto location = context.getComponent<LocationComponent>(id);
-    auto velocity = context.getComponent<VelocityComponent>(id);
-    auto acceleration = context.getComponent<AccelerationComponent>(id);
+    auto &location = context.getComponent<LocationComponent>(id);
+    auto &velocity = context.getComponent<VelocityComponent>(id);
+    auto &acceleration = context.getComponent<AccelerationComponent>(id);
 #ifdef USE_EULER
     location += velocity * deltaTime;
     velocity += acceleration * deltaTime;

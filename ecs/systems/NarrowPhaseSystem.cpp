@@ -59,8 +59,8 @@ void NarrowPhaseSystem::update(Context &context, real deltaTime) {
 }
 
 void NarrowPhaseSystem::handle(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto shape1 = context.getComponent<ShapeComponent>(id1);
-    auto shape2 = context.getComponent<ShapeComponent>(id2);
+    auto &shape1 = context.getComponent<ShapeComponent>(id1);
+    auto &shape2 = context.getComponent<ShapeComponent>(id2);
     handler_function handlerFunc = handlers[static_cast<size_t>(shape1.shapeType)][static_cast<size_t>(shape2.shapeType)];
     (*handlerFunc)(context, id1, id2, deltaTime);
 }
@@ -120,14 +120,14 @@ void NarrowPhaseSystem::getMinMaxOnAxis(const Vector2 *edges, size_t count, cons
 }
 
 void NarrowPhaseSystem::Convex2Convex(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto polygon1 = context.getComponent<PolygonComponent>(id1);
-    auto polygon2 = context.getComponent<PolygonComponent>(id2);
+    auto &polygon1 = context.getComponent<PolygonComponent>(id1);
+    auto &polygon2 = context.getComponent<PolygonComponent>(id2);
 #ifdef USE_ROTATION
-    auto location1 = context.getComponent<LocationComponent>(id1);
+    auto &location1 = context.getComponent<LocationComponent>(id1);
     auto angle1 = location1.angular;
     auto position1 = location1.linear;
 
-    auto location2 = context.getComponent<LocationComponent>(id2);
+    auto &location2 = context.getComponent<LocationComponent>(id2);
     auto angle2 = location2.angular;
     auto position2 = location2.linear;
 #else
@@ -176,8 +176,8 @@ void NarrowPhaseSystem::Convex2Convex(Context &context, EntityId id1, EntityId i
 #endif
 #ifndef USE_CIRCLES_ONLY
 void NarrowPhaseSystem::AABB2AABB(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto aabb1 = context.getComponent<ShapeComponent>(id1).boundingBox;
-    auto aabb2 = context.getComponent<ShapeComponent>(id2).boundingBox;
+    auto &aabb1 = context.getComponent<ShapeComponent>(id1).boundingBox;
+    auto &aabb2 = context.getComponent<ShapeComponent>(id2).boundingBox;
 
     auto d1 = aabb2.min - aabb1.max;
     auto d2 = aabb1.min - aabb2.max;
@@ -197,9 +197,9 @@ void NarrowPhaseSystem::Circle2AABB(Context &context, EntityId id1, EntityId id2
 }
 
 void NarrowPhaseSystem::AABB2Circle(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto shape1 = context.getComponent<ShapeComponent>(id1);
+    auto &shape1 = context.getComponent<ShapeComponent>(id1);
     auto aabb1 = shape1.boundingBox;
-    auto shape2 = context.getComponent<ShapeComponent>(id2);
+    auto &shape2 = context.getComponent<ShapeComponent>(id2);
     auto center2 = shape2.centroid;
     auto radius2 = shape2.radius;
 
@@ -238,12 +238,12 @@ void NarrowPhaseSystem::AABB2Convex(Context &context, EntityId id1, EntityId id2
 }
 
 void NarrowPhaseSystem::Convex2AABB(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto polygon1 = context.getComponent<PolygonComponent>(id1);
-    auto aabb2 = context.getComponent<ShapeComponent>(id2).boundingBox;
+    auto &polygon1 = context.getComponent<PolygonComponent>(id1);
+    auto &aabb2 = context.getComponent<ShapeComponent>(id2).boundingBox;
     auto size = polygon1.count;
     auto totalSize = size + 2;
 #ifdef USE_ROTATION
-    auto location1 = context.getComponent<LocationComponent>(id1);
+    auto &location1 = context.getComponent<LocationComponent>(id1);
     auto angle = location1.angular;
     auto position1 = location1.linear;
 #else
@@ -281,8 +281,8 @@ void NarrowPhaseSystem::Convex2AABB(Context &context, EntityId id1, EntityId id2
 #endif
 #ifndef USE_AABB_ONLY
 void NarrowPhaseSystem::Circle2Circle(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto shape1 = context.getComponent<ShapeComponent>(id1);
-    auto shape2 = context.getComponent<ShapeComponent>(id2);
+    auto &shape1 = context.getComponent<ShapeComponent>(id1);
+    auto &shape2 = context.getComponent<ShapeComponent>(id2);
 
     auto sumR = shape1.radius + shape2.radius;
     auto displacement = shape2.centroid - shape1.centroid;
@@ -305,13 +305,13 @@ void NarrowPhaseSystem::Circle2Convex(Context &context, EntityId id1, EntityId i
 }
 
 void NarrowPhaseSystem::Convex2Circle(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto polygon1 = context.getComponent<PolygonComponent>(id1);
-    auto shape2 = context.getComponent<ShapeComponent>(id2);
+    auto &polygon1 = context.getComponent<PolygonComponent>(id1);
+    auto &shape2 = context.getComponent<ShapeComponent>(id2);
     auto center2 = shape2.centroid;
     auto radius2 = shape2.radius;
     auto size = polygon1.count;
 #ifdef USE_ROTATION
-    auto location1 = context.getComponent<LocationComponent>(id1);
+    auto &location1 = context.getComponent<LocationComponent>(id1);
     auto angle = location1.angular;
     auto position1 = location1.linear;
 #else

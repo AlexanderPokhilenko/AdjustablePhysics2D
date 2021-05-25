@@ -10,6 +10,6 @@ ComponentsBitset createCurrentSystemBitset()
 GlobalGravitationSystem::GlobalGravitationSystem() : System(createCurrentSystemBitset()), g({0, -9.81}) { }
 
 void GlobalGravitationSystem::update(Context &context, EntityId id, real deltaTime) {
-    auto velocity = context.getComponent<VelocityComponent>(id);
+    auto &velocity = context.getComponent<VelocityComponent>(id);
     velocity.linear += g * deltaTime;
 }
