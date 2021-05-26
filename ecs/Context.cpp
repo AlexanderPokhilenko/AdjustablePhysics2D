@@ -15,7 +15,6 @@ Context::Context(size_t entitiesCapacity, size_t freeCapacity) : freeIds(), inUs
     components[static_cast<std::size_t>(ComponentType::Location)] = new ComponentContainer<LocationComponent>(entitiesCapacity);
     components[static_cast<std::size_t>(ComponentType::Velocity)] = new ComponentContainer<VelocityComponent>(entitiesCapacity);
     components[static_cast<std::size_t>(ComponentType::Acceleration)] = new ComponentContainer<AccelerationComponent>(entitiesCapacity);
-    components[static_cast<std::size_t>(ComponentType::Force)] = new ComponentContainer<ForceComponent>(entitiesCapacity);
 }
 
 size_t Context::getEntitiesSize() {
@@ -24,6 +23,14 @@ size_t Context::getEntitiesSize() {
 
 bool Context::checkEntity(EntityId id, ComponentsBitset bitset) {
     return (inUse[id] & bitset) == bitset;
+}
+
+bool Context::hasEntity(EntityId id) const {
+    if(id >= inUse.size()) return false;
+    for (auto freeId : freeIds) {
+        if(freeId == id) return false;
+    }
+    return true;
 }
 
 EntityId Context::createEntity() {
@@ -42,6 +49,14 @@ EntityId Context::createEntity() {
 void Context::deleteEntity(EntityId id) {
     inUse[id].reset();
     freeIds.push_back(id);
+}
+
+bool Context::hasComponent(EntityId id, ComponentType type) const {
+    return inUse[id].test(static_cast<std::size_t>(type));
+}
+
+void Context::removeComponent(EntityId id, ComponentType type) {
+    inUse[id].reset(static_cast<std::size_t>(type));
 }
 
 Context::~Context() {

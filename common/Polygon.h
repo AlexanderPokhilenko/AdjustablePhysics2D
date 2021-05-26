@@ -8,8 +8,8 @@
 
 struct Polygon
 {
-    int count;
-    Vector2* edges;
+    size_t count;
+    Vector2* vertices;
     Vector2* normals;
 #ifndef USE_CIRCLES_ONLY
     AABB getAABB(real angle = 0) const;

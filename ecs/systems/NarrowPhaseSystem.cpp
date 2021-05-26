@@ -87,17 +87,17 @@ bool NarrowPhaseSystem::checkPenetration(real min1, real max1, real min2, real m
 #ifdef USE_ROTATION
 void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& position, real angle, Vector2* edges, Vector2* normals) {
 #else
-void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& position, Vector2* edges, Vector2* normals) {
+void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& position, Vector2* vertices, Vector2* normals) {
 #endif
     auto size = polygon.count;
-    auto localEdges = polygon.edges;
+    auto localEdges = polygon.vertices;
     auto localNormals = polygon.normals;
     for (size_t i = 0; i < size; ++i) {
 #ifdef USE_ROTATION
         edges[i] = localEdges[i].getRotated(angle) + position;
         normals[i] = localNormals[i].getRotated(angle) + position;
 #else
-        edges[i] = localEdges[i] + position;
+        vertices[i] = localEdges[i] + position;
         normals[i] = localNormals[i] + position;
 #endif
     }
@@ -263,7 +263,7 @@ void NarrowPhaseSystem::Convex2AABB(Context &context, EntityId id1, EntityId id2
 #ifdef USE_ROTATION
     getGlobalVectors(polygon1, position1, angle, edges1, normals);
 #else
-    getGlobalVectors(polygon1, position1, edges, normals);
+    getGlobalVectors(polygon1, position1, vertices, normals);
 #endif
     normals[size] = {1, 0};
     normals[size+1] = {0, 1};
@@ -330,7 +330,7 @@ void NarrowPhaseSystem::Convex2Circle(Context &context, EntityId id1, EntityId i
 #ifdef USE_ROTATION
     getGlobalVectors(polygon1, position1, angle, edges, normals);
 #else
-    getGlobalVectors(polygon1, position1, edges, normals);
+    getGlobalVectors(polygon1, position1, vertices, normals);
 #endif
 #ifdef DOUBLE_PRECISION
     real minDepth = DBL_MAX;

@@ -14,7 +14,7 @@ private:
 #ifdef USE_ROTATION
     static void getGlobalVectors(const Polygon& polygon, const Vector2& position, real angle, Vector2 edges[], Vector2 normals[]);
 #else
-    static void getGlobalVectors(const Polygon& polygon, const Vector2& location, Vector2 edges[], Vector2 normals[]);
+    static void getGlobalVectors(const Polygon& polygon, const Vector2& location, Vector2 vertices[], Vector2 normals[]);
 #endif
     static void getMinMaxOnAxis(const Vector2 edges[], size_t count, const Vector2& axis, real& min, real& max);
     static void Convex2Convex(Context &context, EntityId id1, EntityId id2, real deltaTime);

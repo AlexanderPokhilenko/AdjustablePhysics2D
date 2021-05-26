@@ -36,6 +36,47 @@ void PhysicsEngine::simulate(real deltaTime) {
     }
 }
 
+bool PhysicsEngine::hasEntity(EntityId id) {
+    return context.hasEntity(id);
+}
+
+Entity PhysicsEngine::getEntity(EntityId id) {
+    return {context, id};
+}
+
+void PhysicsEngine::deleteEntity(EntityId id) {
+    return context.deleteEntity(id);
+}
+
+void PhysicsEngine::deleteEntity(Entity entity) {
+    return entity.context.deleteEntity(entity.id);
+}
+
+#ifndef USE_PRIMITIVES_ONLY
+Entity PhysicsEngine::createComplex(Vector2* edges, size_t count, Transform location) {
+    auto entity = Entity::create(context);
+    entity.makeConvex(edges, count);
+    entity.setLocation(location);
+    return entity;
+}
+#endif
+#ifndef USE_CIRCLES_ONLY
+Entity PhysicsEngine::createAABB(Vector2 min, Vector2 max, Transform location) {
+    auto entity = Entity::create(context);
+    entity.makeAABB(min, max);
+    entity.setLocation(location);
+    return entity;
+}
+#endif
+#ifndef USE_AABB_ONLY
+Entity PhysicsEngine::createCircle(real radius, Transform location) {
+    auto entity = Entity::create(context);
+    entity.makeCircle(radius);
+    entity.setLocation(location);
+    return entity;
+}
+#endif
+
 PhysicsEngine::~PhysicsEngine() {
     for (auto & system : systems) {
         delete system;

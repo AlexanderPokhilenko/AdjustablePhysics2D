@@ -32,10 +32,12 @@ public:
     explicit Context(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
     size_t getEntitiesSize();
     bool checkEntity(EntityId id, ComponentsBitset bitset);
+    bool hasEntity(EntityId id) const;
     EntityId createEntity();
     void deleteEntity(EntityId id);
     template<typename T>
     bool hasComponent(EntityId id) const;
+    bool hasComponent(EntityId id, ComponentType type) const;
     template<typename T>
     T& getComponent(EntityId id);
     template<typename T>
@@ -44,6 +46,7 @@ public:
     void addComponent(EntityId id, Args&&... args);
     template<typename T>
     void removeComponent(EntityId id);
+    void removeComponent(EntityId id, ComponentType type);
     ~Context();
 };
 #include "ContextTemplatesImpl.h"
