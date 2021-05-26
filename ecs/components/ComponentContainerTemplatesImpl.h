@@ -18,9 +18,9 @@ const T &ComponentContainer<T>::get(EntityId id) const {
 
 template<typename T>
 template<typename... Args>
-void ComponentContainer<T>::add(EntityId entity, Args &&... args) {
+void ComponentContainer<T>::add(EntityId id, Args &&... args) {
     components.template emplace_back(std::forward<Args>(args)...);
-    components[entity] = std::move(components.back());
+    components[id] = std::move(components.back());
     components.pop_back();
 }
 
