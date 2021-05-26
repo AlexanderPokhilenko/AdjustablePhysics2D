@@ -5,6 +5,7 @@
 
 class BroadPhaseSystem : public System {
 private:
+    static ComponentsBitset createCurrentSystemBitset();
 #ifdef USE_SPATIAL_HASHING
     static const long P1 = 73856093;
     static const long P2 = 19349663;

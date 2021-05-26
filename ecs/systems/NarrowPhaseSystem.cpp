@@ -2,7 +2,7 @@
 #include <cmath>
 #include <cfloat>
 
-ComponentsBitset createCurrentSystemBitset()
+ComponentsBitset NarrowPhaseSystem::createCurrentSystemBitset()
 {
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Shape));

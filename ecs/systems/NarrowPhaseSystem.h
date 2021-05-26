@@ -5,6 +5,7 @@
 
 class NarrowPhaseSystem : public System {
 private:
+    static ComponentsBitset createCurrentSystemBitset();
     using handler_function = void (*)(Context&, EntityId, EntityId, real);
     handler_function handlers[3][3];
     void handle(Context &context, EntityId id1, EntityId id2, real deltaTime);

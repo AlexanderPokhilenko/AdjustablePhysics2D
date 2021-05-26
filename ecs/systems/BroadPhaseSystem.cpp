@@ -1,6 +1,6 @@
 #include "BroadPhaseSystem.h"
 
-ComponentsBitset createCurrentSystemBitset()
+ComponentsBitset BroadPhaseSystem::createCurrentSystemBitset()
 {
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Shape));

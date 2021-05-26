@@ -1,6 +1,6 @@
 #include "MoveSystem.h"
 
-ComponentsBitset createCurrentSystemBitset()
+ComponentsBitset MoveSystem::createCurrentSystemBitset()
 {
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Location));

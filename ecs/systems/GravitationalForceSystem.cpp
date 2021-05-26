@@ -1,6 +1,6 @@
 #include "GravitationalForceSystem.h"
 
-ComponentsBitset createCurrentSystemBitset()
+ComponentsBitset GravitationalForceSystem::createCurrentSystemBitset()
 {
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Location));

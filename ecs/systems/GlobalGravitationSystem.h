@@ -4,6 +4,8 @@
 #include "System.h"
 
 class GlobalGravitationSystem : public System {
+private:
+    static ComponentsBitset createCurrentSystemBitset();
 protected:
     void update(Context &context, EntityId id, real deltaTime) override;
 public:

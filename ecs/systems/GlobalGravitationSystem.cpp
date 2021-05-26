@@ -1,6 +1,6 @@
 #include "GlobalGravitationSystem.h"
 
-ComponentsBitset createCurrentSystemBitset()
+ComponentsBitset GlobalGravitationSystem::createCurrentSystemBitset()
 {
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Velocity));

@@ -1,6 +1,6 @@
 #include "ShapeTranslationSystem.h"
 
-ComponentsBitset createCurrentSystemBitset()
+ComponentsBitset ShapeTranslationSystem::createCurrentSystemBitset()
 {
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Location));
