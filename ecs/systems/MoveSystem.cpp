@@ -1,4 +1,6 @@
 #include "MoveSystem.h"
+#include "../components/Components.h"
+#include "../Context.h"
 
 ComponentsBitset MoveSystem::createCurrentSystemBitset()
 {

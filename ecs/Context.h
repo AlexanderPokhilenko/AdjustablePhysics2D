@@ -46,5 +46,5 @@ public:
     void removeComponent(EntityId id);
     ~Context();
 };
-
+#include "ContextTemplatesImpl.h"
 #endif //ADJUSTABLEPHYSICS2D_CONTEXT_H

@@ -30,7 +30,7 @@ BroadPhaseSystem::BroadPhaseSystem() : System(createCurrentSystemBitset()) { }
 #endif
 
 void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
-    auto &shape = context.getComponent<Shape>(id);
+    auto &shape = context.getComponent<ShapeComponent>(id);
 #ifdef USE_QUADTREE
 #error Not implemented! //TODO
 #elif defined(USE_SPATIAL_HASHING)

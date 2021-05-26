@@ -1,4 +1,5 @@
-#include "ComponentContainer.h"
+#ifndef PHYSICSGUI1_COMPONENTCONTAINERTEMPLATESIMPL_H
+#define PHYSICSGUI1_COMPONENTCONTAINERTEMPLATESIMPL_H
 
 template<typename T>
 ComponentContainer<T>::ComponentContainer(std::size_t capacity) : components() {
@@ -22,3 +23,5 @@ void ComponentContainer<T>::add(EntityId entity, Args &&... args) {
     components[entity] = std::move(components.back());
     components.pop_back();
 }
+
+#endif //PHYSICSGUI1_COMPONENTCONTAINERTEMPLATESIMPL_H

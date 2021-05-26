@@ -17,5 +17,5 @@ public:
     template<typename... Args>
     void add(EntityId id, Args&&... args);
 };
-
+#include "ComponentContainerTemplatesImpl.h"
 #endif //ADJUSTABLEPHYSICS2D_COMPONENTCONTAINER_H
