@@ -40,13 +40,13 @@ CollisionSystem::CollisionSystem() : System()
 
 #ifdef USE_COLLISION_IMPULSE
 #ifndef USE_PRIMITIVES_ONLY
-void CollisionSystem::getEdgesWithMaxProjection(const PolygonComponent &polygon, const LocationComponent &location, Vector2 axis, std::vector<Vector2> &edges) {
+void CollisionSystem::getVerticesWithMaxProjection(const PolygonComponent &polygon, const LocationComponent &location, Vector2 axis, std::vector<Vector2> &edges) {
     auto position = location.linear;
 #ifdef USE_ROTATION
     auto angle = location.angular;
 #endif
     auto size = polygon.count;
-    auto localEdges = polygon.edges;
+    auto localEdges = polygon.vertices;
 #ifdef DOUBLE_PRECISION
     real maxProjection = DBL_MIN;
 #else
@@ -68,9 +68,9 @@ void CollisionSystem::getEdgesWithMaxProjection(const PolygonComponent &polygon,
     }
 }
 
-void CollisionSystem::getMinMaxProjections(const std::vector<Vector2> &edges, Vector2 axis, real &min, size_t &minIndex, real &max, size_t &maxIndex) {
-    for (size_t i = 0; i < edges.size(); ++i) {
-        auto projection = Vector2::dotProduct(edges[i], axis);
+void CollisionSystem::getMinMaxProjections(const std::vector<Vector2> &vertices, Vector2 axis, real &min, size_t &minIndex, real &max, size_t &maxIndex) {
+    for (size_t i = 0; i < vertices.size(); ++i) {
+        auto projection = Vector2::dotProduct(vertices[i], axis);
         if(projection <= min) {
             min = projection;
             minIndex = i;
@@ -82,9 +82,9 @@ void CollisionSystem::getMinMaxProjections(const std::vector<Vector2> &edges, Ve
     }
 }
 
-Vector2 CollisionSystem::getCollisionPointFromEdges(const std::vector<Vector2> &edges1, const std::vector<Vector2> &edges2, const Collision &collision) {
-    if(edges1.size() > 1) {
-        if(edges2.size() > 1) {
+Vector2 CollisionSystem::getCollisionPointFromVertices(const std::vector<Vector2> &vertices1, const std::vector<Vector2> &vertices2, const Collision &collision) {
+    if(vertices1.size() > 1) {
+        if(vertices2.size() > 1) {
             Vector2 tangential = {collision.normal.y, -collision.normal.x};
             size_t min1Index, max1Index, min2Index, max2Index;
 #ifdef DOUBLE_PRECISION
@@ -92,11 +92,11 @@ Vector2 CollisionSystem::getCollisionPointFromEdges(const std::vector<Vector2> &
 #else
             real min1(FLT_MAX), max1(FLT_MIN), min2(FLT_MAX), max2(FLT_MIN);
 #endif
-            getMinMaxProjections(edges1, tangential, min1, min1Index, max1, max1Index);
-            getMinMaxProjections(edges2, tangential, min2, min2Index, max2, max2Index);
+            getMinMaxProjections(vertices1, tangential, min1, min1Index, max1, max1Index);
+            getMinMaxProjections(vertices2, tangential, min2, min2Index, max2, max2Index);
             bool pickFirstMin = min1 > min2, pickFirstMax = max1 < max2;
-            auto min = pickFirstMin ? edges1[min1Index] : edges2[min2Index];
-            auto max = pickFirstMax ? edges1[max1Index] : edges2[max2Index];
+            auto min = pickFirstMin ? vertices1[min1Index] : vertices2[min2Index];
+            auto max = pickFirstMax ? vertices1[max1Index] : vertices2[max2Index];
             if(pickFirstMin) {
                 if(pickFirstMax) {
                     return (min + max) * real(0.5) - collision.normal * (collision.penetration * real(0.5));
@@ -111,13 +111,13 @@ Vector2 CollisionSystem::getCollisionPointFromEdges(const std::vector<Vector2> &
                 }
             }
         } else {
-            return edges2[0] + collision.normal * (collision.penetration * real(0.5));
+            return vertices2[0] + collision.normal * (collision.penetration * real(0.5));
         }
     } else {
-        if(edges2.size() > 1) {
-            return edges1[0] - collision.normal * (collision.penetration * real(0.5));
+        if(vertices2.size() > 1) {
+            return vertices1[0] - collision.normal * (collision.penetration * real(0.5));
         } else {
-            return (edges1[0] + edges2[0]) * real(0.5);
+            return (vertices1[0] + vertices2[0]) * real(0.5);
         }
     }
 }
@@ -129,10 +129,10 @@ Vector2 CollisionSystem::Convex2Convex(const Context &context, const Collision &
     auto &polygon2 = context.getComponent<PolygonComponent>(collision.second);
 
     std::vector<Vector2> maxEdges1, maxEdges2;
-    getEdgesWithMaxProjection(polygon1, location1, collision.normal, maxEdges1);
-    getEdgesWithMaxProjection(polygon2, location2, -collision.normal, maxEdges2);
+    getVerticesWithMaxProjection(polygon1, location1, collision.normal, maxEdges1);
+    getVerticesWithMaxProjection(polygon2, location2, -collision.normal, maxEdges2);
 
-    return getCollisionPointFromEdges(maxEdges1, maxEdges2, collision);
+    return getCollisionPointFromVertices(maxEdges1, maxEdges2, collision);
 }
 #endif
 #ifndef USE_CIRCLES_ONLY
@@ -191,7 +191,7 @@ Vector2 CollisionSystem::Convex2AABB(const Context &context, const Collision &co
     auto center2 = shape2.getCenter();
 
     std::vector<Vector2> maxEdges1, maxEdges2;
-    getEdgesWithMaxProjection(polygon1, location1, collision.normal, maxEdges1);
+    getVerticesWithMaxProjection(polygon1, location1, collision.normal, maxEdges1);
     auto axis2 = -collision.normal;
 #ifdef DOUBLE_PRECISION
     real maxProjection = DBL_MIN;
@@ -208,7 +208,7 @@ Vector2 CollisionSystem::Convex2AABB(const Context &context, const Collision &co
         }
     }
 
-    return getCollisionPointFromEdges(maxEdges1, maxEdges2, collision);
+    return getCollisionPointFromVertices(maxEdges1, maxEdges2, collision);
 }
 #endif
 #endif

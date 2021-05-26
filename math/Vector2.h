@@ -25,6 +25,8 @@ struct Vector2 {
     Vector2 operator -(const Vector2& second) const;
     Vector2& operator +=(const Vector2& right);
     Vector2& operator -=(const Vector2& right);
+    Vector2& operator *=(real k);
+    Vector2& operator /=(real k);
     Vector2 operator *(real k) const;
     Vector2 operator /(real k) const;
 };

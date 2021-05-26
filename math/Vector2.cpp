@@ -108,3 +108,15 @@ Vector2& Vector2::operator-=(const Vector2& right) {
     y -= right.y;
     return *this;
 }
+
+Vector2& Vector2::operator *=(real k) {
+    x *= k;
+    y *= k;
+    return *this;
+}
+
+Vector2& Vector2::operator /=(real k) {
+    x /= k;
+    y /= k;
+    return *this;
+}

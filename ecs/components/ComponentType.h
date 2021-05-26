@@ -1,6 +1,8 @@
 #ifndef ADJUSTABLEPHYSICS2D_COMPONENTTYPE_H
 #define ADJUSTABLEPHYSICS2D_COMPONENTTYPE_H
 
+#include <bitset>
+
 enum class ComponentType {
     Shape,
     MassInfo,
@@ -9,7 +11,6 @@ enum class ComponentType {
     Location,
     Velocity,
     Acceleration,
-    Force,
     COUNT
 };
 

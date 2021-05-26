@@ -33,9 +33,9 @@ private:
     using handler_function = Vector2 (*)(const Context&, const Collision&);
     handler_function handlers[3][3];
 #ifndef USE_PRIMITIVES_ONLY
-    static void getEdgesWithMaxProjection(const PolygonComponent &polygon, const LocationComponent &location, Vector2 axis, std::vector<Vector2> &edges);
-    static void getMinMaxProjections(const std::vector<Vector2> &edges, Vector2 axis, real &min, size_t &minIndex, real &max, size_t &maxIndex);
-    static Vector2 getCollisionPointFromEdges(const std::vector<Vector2> &edges1, const std::vector<Vector2> &edges2, const Collision &collision);
+    static void getVerticesWithMaxProjection(const PolygonComponent &polygon, const LocationComponent &location, Vector2 axis, std::vector<Vector2> &edges);
+    static void getMinMaxProjections(const std::vector<Vector2> &vertices, Vector2 axis, real &min, size_t &minIndex, real &max, size_t &maxIndex);
+    static Vector2 getCollisionPointFromVertices(const std::vector<Vector2> &vertices1, const std::vector<Vector2> &vertices2, const Collision &collision);
     static Vector2 Convex2Convex(const Context &context, const Collision &collision);
 #endif
 #ifndef USE_CIRCLES_ONLY

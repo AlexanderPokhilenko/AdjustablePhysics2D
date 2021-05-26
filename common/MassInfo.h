@@ -7,6 +7,9 @@ struct MassInfo {
 #ifndef USE_EQUAL_MASSES
     real mass;
     real inverseMass;
+#ifndef USE_INERTIA
+    MassInfo(real mass);
+#endif
 #else
 #ifndef MASS
 #define MASS 1
@@ -17,6 +20,11 @@ struct MassInfo {
 #ifdef USE_INERTIA
     real inertia;
     real inverseInertia;
+#ifndef USE_EQUAL_MASSES
+    MassInfo(real mass, real inertia);
+#else
+    MassInfo(real inertia);
+#endif
 #endif
 };
 
