@@ -20,7 +20,7 @@ public:
     static constexpr const real DefaultInertiaCoefficient = CylinderInertiaCoefficient;
 #endif
     explicit PhysicsEngine(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
-    void forEachEntity(std::function<void(Entity&)>);
+    void forEachEntity(const std::function<void(Entity&)>&);
     bool hasEntity(EntityId id);
     Entity getEntity(EntityId id);
     void deleteEntity(EntityId id);

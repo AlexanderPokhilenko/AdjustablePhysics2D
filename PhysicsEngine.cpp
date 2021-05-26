@@ -30,7 +30,7 @@ systems() {
     systems[static_cast<std::size_t>(SystemType::Collision)] = new CollisionSystem();
 }
 
-void PhysicsEngine::forEachEntity(const std::function<void(Entity &)> func) {
+void PhysicsEngine::forEachEntity(const std::function<void(Entity &)>& func) {
     auto size = context.getEntitiesSize();
     for (EntityId i = 0; i < size; i++) {
         if(context.hasEntity(i))
