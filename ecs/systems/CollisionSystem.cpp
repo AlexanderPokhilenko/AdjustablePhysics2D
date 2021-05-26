@@ -324,7 +324,6 @@ void CollisionSystem::updateVelocity(const Context &context, EntityId id, Vector
     auto relativeVelocity = Vector2::dotProduct(relativeVelocityVector, direction);
 #ifdef NEED_COLLISION_MATERIAL_INFO
     auto hasMaterial = context.hasComponent<MaterialComponent>(id);
-    real bounciness, friction;
     auto &material = context.getComponent<MaterialComponent>(id);
 #ifdef USE_BOUNCINESS
     auto numerator = hasMaterial ? direction * ((1 + material.bounciness) * relativeVelocity) :
