@@ -67,16 +67,15 @@ void NarrowPhaseSystem::handle(Context &context, EntityId id1, EntityId id2, rea
 
 #ifndef USE_PRIMITIVES_ONLY
 bool NarrowPhaseSystem::checkPenetration(real min1, real max1, real min2, real max2, const Vector2 &axis, Vector2& normal, real &penetration) {
-    real depth;
     if (min1 < min2) {
-        depth = max1 - min2;
+        auto depth = max1 - min2;
         if (depth < 0) return false;
         if (depth < penetration) {
             normal = -axis;
             penetration = depth;
         }
     } else {
-        depth = max2 - min1;
+        auto depth = max2 - min1;
         if (depth < 0) return false;
         if (depth < penetration) {
             normal = axis;
@@ -88,7 +87,7 @@ bool NarrowPhaseSystem::checkPenetration(real min1, real max1, real min2, real m
 #ifdef USE_ROTATION
 void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& position, real angle, Vector2* edges, Vector2* normals) {
 #else
-void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& location, Vector2* edges, Vector2* normals) {
+void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& position, Vector2* edges, Vector2* normals) {
 #endif
     auto size = polygon.count;
     auto localEdges = polygon.edges;
@@ -176,18 +175,27 @@ void NarrowPhaseSystem::Convex2Convex(Context &context, EntityId id1, EntityId i
 #endif
 #ifndef USE_CIRCLES_ONLY
 void NarrowPhaseSystem::AABB2AABB(Context &context, EntityId id1, EntityId id2, real deltaTime) {
-    auto &aabb1 = context.getComponent<ShapeComponent>(id1).boundingBox;
-    auto &aabb2 = context.getComponent<ShapeComponent>(id2).boundingBox;
+    auto &shape1 = context.getComponent<ShapeComponent>(id1);
+    auto &shape2 = context.getComponent<ShapeComponent>(id2);
+    auto position1 = shape1.getCenter();
+    auto position2 = shape2.getCenter();
+    auto halfSize1 = shape1.boundingBox.getHalfSize();
+    auto halfSize2 = shape2.boundingBox.getHalfSize();
+    auto halfSum = halfSize1 + halfSize2;
 
-    auto d1 = aabb2.min - aabb1.max;
-    auto d2 = aabb1.min - aabb2.max;
-    if(d1.x > 0 || d1.y > 0 || d2.x > 0 || d2.y > 0) return;
-    // Change normal?
-    if(d1.getSqrMagnitude() < d2.getSqrMagnitude()) {
-        Collision collision {id1, id2, d1.getMagnitude(), -d1.getNormalized()};
+    auto displacement = position2 - position1;
+    Vector2 penetration = {
+            displacement.x >= 0 ? halfSum.x - displacement.x : halfSum.x + displacement.x,
+            displacement.y >= 0 ? halfSum.y - displacement.y : halfSum.y + displacement.y
+    };
+
+    if(penetration.x <= 0 || penetration.y <= 0) return;
+
+    if(penetration.x <= penetration.y) {
+        Collision collision {id1, id2, penetration.x, {real(displacement.x < 0 ? - 1 : 1), 0}};
         context.collisions.push_back(collision);
     } else {
-        Collision collision {id1, id2, d2.getMagnitude(), -d2.getNormalized()};
+        Collision collision {id1, id2, penetration.y, {0, real(displacement.y < 0 ? -1 : 1)}};
         context.collisions.push_back(collision);
     }
 }

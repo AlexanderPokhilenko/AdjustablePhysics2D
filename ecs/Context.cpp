@@ -55,7 +55,7 @@ const ComponentContainer<T> *Context::getComponents() const {
 }
 
 template<typename T>
-bool Context::hasComponent(EntityId id) {
+bool Context::hasComponent(EntityId id) const {
     return inUse[id].test(T::type);
 }
 

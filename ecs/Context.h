@@ -15,6 +15,7 @@ friend class System;
 friend class BroadPhaseSystem;
 #endif
 friend class NarrowPhaseSystem;
+friend class CollisionSystem;
 private:
     std::vector<EntityId> freeIds;
     std::vector<ComponentsBitset> inUse;
@@ -34,7 +35,7 @@ public:
     EntityId createEntity();
     void deleteEntity(EntityId id);
     template<typename T>
-    bool hasComponent(EntityId id);
+    bool hasComponent(EntityId id) const;
     template<typename T>
     T& getComponent(EntityId id);
     template<typename T>

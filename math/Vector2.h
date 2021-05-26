@@ -7,6 +7,8 @@ struct Vector2 {
     real x;
     real y;
 
+    static bool almostEquals(const Vector2& first, const Vector2& second, real epsilon = 1e-3);
+
     static real dotProduct(const Vector2& first, const Vector2& second);
     static real crossProduct(const Vector2& first, const Vector2& second);
 

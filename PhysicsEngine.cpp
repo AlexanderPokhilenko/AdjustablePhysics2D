@@ -11,6 +11,7 @@
 #include "ecs/systems/BroadPhaseSystem.h"
 #endif
 #include "ecs/systems/NarrowPhaseSystem.h"
+#include "ecs/systems/CollisionSystem.h"
 
 PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
 systems() {
@@ -26,6 +27,7 @@ systems() {
     systems[static_cast<std::size_t>(SystemType::BroadPhase)] = new BroadPhaseSystem();
 #endif
     systems[static_cast<std::size_t>(SystemType::NarrowPhase)] = new NarrowPhaseSystem();
+    systems[static_cast<std::size_t>(SystemType::Collision)] = new CollisionSystem();
 }
 
 void PhysicsEngine::simulate(real deltaTime) {

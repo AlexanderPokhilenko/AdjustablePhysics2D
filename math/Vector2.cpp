@@ -1,6 +1,14 @@
 #include "Vector2.h"
 #include <cmath>
 
+bool Vector2::almostEquals(const Vector2 &first, const Vector2 &second, real epsilon) {
+#ifdef DOUBLE_PRECISION
+    return fabs(first.x - second.x) <= epsilon && fabs(first.y - second.y) <= epsilon;
+#else
+    return fabsf(first.x - second.x) <= epsilon && fabsf(first.y - second.y) <= epsilon;
+#endif
+}
+
 real Vector2::dotProduct(const Vector2 &first, const Vector2 &second) {
     return first.x * second.x + first.y * second.y;
 }

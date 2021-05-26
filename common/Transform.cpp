@@ -1,5 +1,12 @@
 # include "Transform.h"
 
+#ifdef USE_ROTATION
+Transform::Transform(Vector2 lin, real ang) : linear(lin), angular(ang) {  }
+Transform::Transform(Vector2 lin) : linear(lin), angular(0) {  }
+#else
+Transform::Transform(Vector2 lin) : linear(lin) {  }
+#endif
+
 Transform Transform::operator-() const {
     return { -linear
 #if USE_ROTATION

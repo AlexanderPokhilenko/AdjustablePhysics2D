@@ -7,7 +7,9 @@ struct Transform {
     Vector2 linear;
 #ifdef USE_ROTATION
     real angular;
+    Transform(Vector2 linear, real angular);
 #endif
+    Transform(Vector2 linear);
 
     Transform operator -() const;
     Transform operator +(const Transform& second) const;

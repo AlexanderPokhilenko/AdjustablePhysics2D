@@ -14,6 +14,7 @@ enum class SystemType {
     BroadPhase,
 #endif
     NarrowPhase,
+    Collision,
     COUNT
 };
 
