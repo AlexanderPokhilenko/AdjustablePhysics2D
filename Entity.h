@@ -19,6 +19,10 @@ public:
     static Entity create(Context &context);
     bool exists() const;
     bool hasComponent(ComponentType type) const;
+    template<typename T>
+    const T& getComponent() const {
+        return context.getComponent<T>(id);
+    }
     void removeComponent(ComponentType type);
 #ifndef USE_PRIMITIVES_ONLY
     void makeConvex(const Vector2 vertices[], size_t count);
