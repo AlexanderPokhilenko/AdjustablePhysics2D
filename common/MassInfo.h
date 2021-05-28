@@ -26,6 +26,7 @@ struct MassInfo {
     MassInfo(real inertia);
 #endif
 #endif
+    MassInfo();
 };
 
 #endif //ADJUSTABLEPHYSICS2D_MASSINFO_H

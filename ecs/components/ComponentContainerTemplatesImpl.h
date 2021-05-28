@@ -20,8 +20,10 @@ template<typename T>
 template<typename... Args>
 void ComponentContainer<T>::add(EntityId id, Args &&... args) {
     components.template emplace_back(std::forward<Args>(args)...);
-    components[id] = std::move(components.back());
-    components.pop_back();
+    if(id != components.size() - 1) {
+        components[id] = std::move(components.back());
+        components.pop_back();
+    }
 }
 
 #endif //PHYSICSGUI1_COMPONENTCONTAINERTEMPLATESIMPL_H

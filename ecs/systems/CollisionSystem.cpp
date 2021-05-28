@@ -8,7 +8,7 @@
 
 CollisionSystem::CollisionSystem() : System()
 #ifdef USE_COLLISION_HOOKE
-, k(10)
+, k(1000)
 #elif defined(USE_COLLISION_IMPULSE)
 , handlers()
 #endif
@@ -280,39 +280,51 @@ void CollisionSystem::updateVelocities(const Context &context, EntityId id1, Ent
                                        Vector2 r1, Vector2 r2,
                                        VelocityComponent &velocity1, VelocityComponent &velocity2) {
     auto relativeVelocity = Vector2::dotProduct(relativeVelocityVector, direction);
-#ifdef NEED_COLLISION_MATERIAL_INFO
-    auto matInfo = getMaterialInfo(context, id1, id2);
-#ifdef USE_BOUNCINESS
-    auto numerator = matInfo.hasInfo ? direction * ((1 + matInfo.bounciness) * relativeVelocity) :
-                     direction * relativeVelocity;
-#else
-    auto numerator = direction * relativeVelocity;
-#endif
-#else
-    auto numerator = direction * relativeVelocity;
+    auto needUpdateNormal = relativeVelocity > 0;
+#ifndef USE_FRICTION
+    if(!needUpdateNormal) return;
 #endif
     auto denominator = massInfo1.inverseMass + massInfo2.inverseMass;
-#ifdef USE_INERTIA
-    denominator += Vector2::crossProduct(direction * (massInfo1.inverseInertia * Vector2::crossProduct(r1, direction)), r1);
-    denominator += Vector2::crossProduct(direction * (massInfo2.inverseInertia * Vector2::crossProduct(r2, direction)), r2);
+#if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
+    auto needUseInertia1 = context.getComponent<ShapeComponent>(id1).shapeType != ShapeType::AABB;
+    auto needUseInertia2 = context.getComponent<ShapeComponent>(id2).shapeType != ShapeType::AABB;
+    if(needUseInertia1) denominator += Vector2::crossProduct(direction * (massInfo1.inverseInertia * Vector2::crossProduct(r1, direction)), r1);
+    if(needUseInertia2) denominator += Vector2::crossProduct(direction * (massInfo2.inverseInertia * Vector2::crossProduct(r2, direction)), r2);
 #endif
-    auto impulse = numerator / denominator;
-    velocity1.linear += impulse * -massInfo1.inverseMass;
-    velocity2.linear += impulse * massInfo2.inverseMass;
-#ifdef USE_ROTATION
-    velocity1.angular += -massInfo1.inverseInertia * Vector2::crossProduct(r1, impulse);
-    velocity2.angular += massInfo2.inverseInertia * Vector2::crossProduct(r2, impulse);
+#ifdef NEED_COLLISION_MATERIAL_INFO
+    auto matInfo = getMaterialInfo(context, id1, id2);
 #endif
+    if(needUpdateNormal) {
+#ifdef NEED_COLLISION_MATERIAL_INFO
+#ifdef USE_BOUNCINESS
+        auto numerator = matInfo.hasInfo ? direction * ((1 + matInfo.bounciness) * relativeVelocity) :
+                         direction * relativeVelocity;
+#else
+        auto numerator = direction * relativeVelocity;
+#endif
+#else
+        auto numerator = direction * relativeVelocity;
+#endif
+        auto impulse = numerator / denominator;
+        velocity1.linear += impulse * massInfo1.inverseMass;
+        velocity2.linear += impulse * -massInfo2.inverseMass;
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+        if(needUseInertia1) velocity1.angular += massInfo1.inverseInertia * Vector2::crossProduct(r1, impulse);
+        if(needUseInertia2) velocity2.angular += -massInfo2.inverseInertia * Vector2::crossProduct(r2, impulse);
+#endif
+    }
 #ifdef USE_FRICTION
     if(matInfo.hasInfo) {
-        auto tangential = ((direction * relativeVelocity) - relativeVelocityVector).getNormalized();
-        auto impulseTangentialMagnitude = Vector2::dotProduct(impulse, tangential);
-        auto impulseTangential = tangential * impulseTangentialMagnitude;
-        velocity1.linear += impulseTangential * (-massInfo1.inverseMass * matInfo.friction);
-        velocity2.linear += impulseTangential * (massInfo2.inverseMass * matInfo.friction);
-#ifdef USE_ROTATION
-        velocity1.angular += -massInfo1.inverseInertia * matInfo.friction * Vector2::crossProduct(r1, impulseTangential);
-        velocity2.angular += massInfo2.inverseInertia * matInfo.friction * Vector2::crossProduct(r2, impulseTangential);
+        auto relativeTangentialVelocityVector = relativeVelocityVector - (direction * relativeVelocity);
+        auto tangential = relativeTangentialVelocityVector.getNormalized();
+        if(std::isnan(tangential.x)) return;
+        auto tangentialNumerator = relativeTangentialVelocityVector * (1 + matInfo.bounciness);
+        auto tangentialImpulse = tangentialNumerator / denominator;
+        velocity1.linear += tangentialImpulse * (massInfo1.inverseMass * matInfo.friction);
+        velocity2.linear += tangentialImpulse * (-massInfo2.inverseMass * matInfo.friction);
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+        if(needUseInertia1) velocity1.angular += massInfo1.inverseInertia * matInfo.friction * Vector2::crossProduct(r1, tangentialImpulse);
+        if(needUseInertia2) velocity2.angular += -massInfo2.inverseInertia * matInfo.friction * Vector2::crossProduct(r2, tangentialImpulse);
 #endif
     }
 #endif
@@ -322,35 +334,46 @@ void CollisionSystem::updateVelocity(const Context &context, EntityId id, Vector
                                      MassInfoComponent &massInfo, Vector2 r, VelocityComponent &velocity) {
 
     auto relativeVelocity = Vector2::dotProduct(relativeVelocityVector, direction);
+    auto needUpdateNormal = relativeVelocity > 0;
+#ifndef USE_FRICTION
+    if(!needUpdateNormal) return;
+#endif
+    auto denominator = massInfo.inverseMass;
+#if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
+    auto needUseInertia = context.getComponent<ShapeComponent>(id).shapeType != ShapeType::AABB;
+    if(needUseInertia) denominator += Vector2::crossProduct(direction * (massInfo.inverseInertia * Vector2::crossProduct(r, direction)), r);
+#endif
 #ifdef NEED_COLLISION_MATERIAL_INFO
     auto hasMaterial = context.hasComponent<MaterialComponent>(id);
     auto &material = context.getComponent<MaterialComponent>(id);
+#endif
+    if(needUpdateNormal) {
+#ifdef NEED_COLLISION_MATERIAL_INFO
 #ifdef USE_BOUNCINESS
-    auto numerator = hasMaterial ? direction * ((1 + material.bounciness) * relativeVelocity) :
-                     direction * relativeVelocity;
+        auto numerator = hasMaterial ? direction * ((1 + material.bounciness) * relativeVelocity) :
+                         direction * relativeVelocity;
 #else
-    auto numerator = direction * relativeVelocity;
+        auto numerator = direction * relativeVelocity;
 #endif
 #else
-    auto numerator = direction * relativeVelocity;
+        auto numerator = direction * relativeVelocity;
 #endif
-    auto denominator = massInfo.inverseMass;
-#ifdef USE_INERTIA
-    denominator += Vector2::crossProduct(direction * (massInfo.inverseInertia * Vector2::crossProduct(r, direction)), r);
+        auto impulse = numerator / denominator;
+        velocity.linear += impulse * massInfo.inverseMass;
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+        if(needUseInertia) velocity.angular += massInfo.inverseInertia * Vector2::crossProduct(r, impulse);
 #endif
-    auto impulse = numerator / denominator;
-    velocity.linear += impulse * -massInfo.inverseMass;
-#ifdef USE_ROTATION
-    velocity.angular += -massInfo.inverseInertia * Vector2::crossProduct(r, impulse);
-#endif
+    }
 #ifdef USE_FRICTION
     if(hasMaterial) {
-        auto tangential = ((direction * relativeVelocity) - relativeVelocityVector).getNormalized();
-        auto impulseTangentialMagnitude = Vector2::dotProduct(impulse, tangential);
-        auto impulseTangential = tangential * impulseTangentialMagnitude;
-        velocity.linear += impulseTangential * (-massInfo.inverseMass * material.friction);
-#ifdef USE_ROTATION
-        velocity.angular += -massInfo.inverseInertia * material.friction * Vector2::crossProduct(r, impulseTangential);
+        auto relativeTangentialVelocityVector = relativeVelocityVector - (direction * relativeVelocity);
+        auto tangential = relativeTangentialVelocityVector.getNormalized();
+        if(std::isnan(tangential.x)) return;
+        auto tangentialNumerator = relativeTangentialVelocityVector * (1 + material.bounciness);
+        auto tangentialImpulse = tangentialNumerator / denominator;
+        velocity.linear += tangentialImpulse * (massInfo.inverseMass * material.friction);
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+        if(needUseInertia) velocity.angular += massInfo.inverseInertia * material.friction * Vector2::crossProduct(r, tangentialImpulse);
 #endif
     }
 #endif

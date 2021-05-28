@@ -169,7 +169,7 @@ void NarrowPhaseSystem::Convex2Convex(Context &context, EntityId id1, EntityId i
         if(!checkPenetration(min1, max1, min2, max2, axis, penetration, minDepth)) return;
     }
 
-    Collision collision {id1, id2, minDepth, penetration};
+    Collision collision {id1, id2, minDepth, -penetration};
     context.collisions.push_back(collision);
 }
 #endif
@@ -192,10 +192,10 @@ void NarrowPhaseSystem::AABB2AABB(Context &context, EntityId id1, EntityId id2, 
     if(penetration.x <= 0 || penetration.y <= 0) return;
 
     if(penetration.x <= penetration.y) {
-        Collision collision {id1, id2, penetration.x, {real(displacement.x < 0 ? - 1 : 1), 0}};
+        Collision collision {id1, id2, penetration.x, {real(displacement.x < 0 ? 1 : -1), 0}};
         context.collisions.push_back(collision);
     } else {
-        Collision collision {id1, id2, penetration.y, {0, real(displacement.y < 0 ? -1 : 1)}};
+        Collision collision {id1, id2, penetration.y, {0, real(displacement.y < 0 ? 1 : -1)}};
         context.collisions.push_back(collision);
     }
 }
@@ -236,7 +236,7 @@ void NarrowPhaseSystem::AABB2Circle(Context &context, EntityId id1, EntityId id2
 #else
     auto penetration = radius2 - sqrtf(sqrDistance);
 #endif
-    Collision collision {id1, id2, penetration, (inside ? -normal : normal).getNormalized()};
+    Collision collision {id1, id2, penetration, (inside ? normal : -normal).getNormalized()};
     context.collisions.push_back(collision);
 }
 #endif
@@ -282,7 +282,7 @@ void NarrowPhaseSystem::Convex2AABB(Context &context, EntityId id1, EntityId id2
         if(!checkPenetration(min1, max1, min2, max2, axis, penetration, minDepth)) return;
     }
 
-    Collision collision {id1, id2, minDepth, penetration};
+    Collision collision {id1, id2, minDepth, -penetration};
     context.collisions.push_back(collision);
 }
 #endif
@@ -298,7 +298,7 @@ void NarrowPhaseSystem::Circle2Circle(Context &context, EntityId id1, EntityId i
     if(sumR * sumR >= displacement.getSqrMagnitude()) return;
 
     auto penetration = displacement.getMagnitude() - sumR;
-    Collision collision {id1, id2, penetration, displacement.getNormalized()};
+    Collision collision {id1, id2, penetration, -displacement.getNormalized()};
     context.collisions.push_back(collision);
 }
 #ifndef USE_PRIMITIVES_ONLY
@@ -346,7 +346,7 @@ void NarrowPhaseSystem::Convex2Circle(Context &context, EntityId id1, EntityId i
         if(!checkPenetration(min1, max1, min2, max2, axis, penetration, minDepth)) return;
     }
 
-    Collision collision {id1, id2, minDepth, penetration};
+    Collision collision {id1, id2, minDepth, -penetration};
     context.collisions.push_back(collision);
 }
 #endif

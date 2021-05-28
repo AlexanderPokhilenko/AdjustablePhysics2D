@@ -3,8 +3,10 @@
 #ifdef USE_ROTATION
 Transform::Transform(Vector2 lin, real ang) : linear(lin), angular(ang) {  }
 Transform::Transform(Vector2 lin) : linear(lin), angular(0) {  }
+Transform::Transform() : linear(Vector2()), angular(0) {  }
 #else
 Transform::Transform(Vector2 lin) : linear(lin) {  }
+Transform::Transform() : linear(Vector2()) {  }
 #endif
 
 Transform Transform::operator-() const {

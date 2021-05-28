@@ -5,6 +5,7 @@
 
 struct Transform {
     Vector2 linear;
+    Transform();
 #ifdef USE_ROTATION
     real angular;
     Transform(Vector2 linear, real angular);

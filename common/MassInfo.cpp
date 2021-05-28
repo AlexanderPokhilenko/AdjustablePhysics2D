@@ -7,6 +7,17 @@ MassInfo::MassInfo(real mass) {
 }
 #endif
 
+MassInfo::MassInfo()
+#ifndef USE_EQUAL_MASSES
+: mass(1), inverseMass(1)
+#ifdef USE_INERTIA
+, inertia(1), inverseInertia(1)
+#endif
+#else
+: inertia(1), inverseInertia(1)
+#endif
+{ }
+
 #ifdef USE_INERTIA
 #ifndef USE_EQUAL_MASSES
 MassInfo::MassInfo(real mass, real inertia) {

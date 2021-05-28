@@ -7,7 +7,7 @@ ComponentsBitset GlobalGravitationSystem::createCurrentSystemBitset()
     return bitset;
 }
 
-GlobalGravitationSystem::GlobalGravitationSystem() : System(createCurrentSystemBitset()), g({0, -9.81}) { }
+GlobalGravitationSystem::GlobalGravitationSystem() : System(createCurrentSystemBitset()), g({0, 9.81}) { }
 
 void GlobalGravitationSystem::update(Context &context, EntityId id, real deltaTime) {
     auto &velocity = context.getComponent<VelocityComponent>(id);
