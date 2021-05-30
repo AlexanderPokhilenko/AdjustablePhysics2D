@@ -10,6 +10,10 @@ struct AABB {
     Vector2 getCenter() const;
     Vector2 getSize() const;
     Vector2 getHalfSize() const;
+    real getArea() const;
+#ifdef USE_INERTIA
+    real getInertia(real mass) const;
+#endif
 
     AABB operator +(const Vector2& vector) const;
     AABB operator -(const Vector2& vector) const;

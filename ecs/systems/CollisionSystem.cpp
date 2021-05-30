@@ -1,6 +1,7 @@
 #include "CollisionSystem.h"
 #include "NarrowPhaseSystem.h"
 #include <cfloat>
+#include "../../math/MathExtensions.h"
 
 #if defined(USE_COLLISION_HOOKE) || defined(USE_COLLISION_IMPULSE)
 #define NEED_VELOCITY_CHECK
@@ -40,13 +41,13 @@ CollisionSystem::CollisionSystem() : System()
 
 #ifdef USE_COLLISION_IMPULSE
 #ifndef USE_PRIMITIVES_ONLY
-void CollisionSystem::getVerticesWithMaxProjection(const PolygonComponent &polygon, const LocationComponent &location, Vector2 axis, std::vector<Vector2> &edges) {
+void CollisionSystem::getVerticesWithMaxProjection(const PolygonComponent &polygon, const LocationComponent &location, Vector2 axis, std::vector<Vector2> &vertices) {
     auto position = location.linear;
 #ifdef USE_ROTATION
     auto angle = location.angular;
 #endif
     auto size = polygon.count;
-    auto localEdges = polygon.vertices;
+    auto localVertices = polygon.vertices;
 #ifdef DOUBLE_PRECISION
     real maxProjection = DBL_MIN;
 #else
@@ -55,15 +56,17 @@ void CollisionSystem::getVerticesWithMaxProjection(const PolygonComponent &polyg
     real projection;
     for (size_t i = 0; i < size; ++i) {
 #ifdef USE_ROTATION
-        auto edge = localEdges[i].getRotated(angle);
+        auto vertex = localVertices[i].getRotated(angle);
 #else
-        auto edge = localEdges[i];
+        auto vertex = localVertices[i];
 #endif
-        projection = Vector2::dotProduct(edge, axis);
-        if(projection > maxProjection) {
-            maxProjection = projection;
-            edges.clear();
-            edges.push_back(edge + position);
+        projection = Vector2::dotProduct(vertex, axis);
+        if(projection >= maxProjection - Epsilon) {
+            if(!almostEquals(projection, maxProjection)) {
+                maxProjection = projection;
+                vertices.clear();
+            }
+            vertices.push_back(vertex + position);
         }
     }
 }
@@ -99,7 +102,7 @@ Vector2 CollisionSystem::getCollisionPointFromVertices(const std::vector<Vector2
             auto max = pickFirstMax ? vertices1[max1Index] : vertices2[max2Index];
             if(pickFirstMin) {
                 if(pickFirstMax) {
-                    return (min + max) * real(0.5) - collision.normal * (collision.penetration * real(0.5));
+                    return (min + max) * real(0.5) + collision.normal * (collision.penetration * real(0.5));
                 } else {
                     return (min + max) * real(0.5);
                 }
@@ -107,15 +110,15 @@ Vector2 CollisionSystem::getCollisionPointFromVertices(const std::vector<Vector2
                 if(pickFirstMax) {
                     return (min + max) * real(0.5);
                 } else {
-                    return (min + max) * real(0.5) + collision.normal * (collision.penetration * real(0.5));
+                    return (min + max) * real(0.5) - collision.normal * (collision.penetration * real(0.5));
                 }
             }
         } else {
-            return vertices2[0] + collision.normal * (collision.penetration * real(0.5));
+            return vertices2[0] - collision.normal * (collision.penetration * real(0.5));
         }
     } else {
         if(vertices2.size() > 1) {
-            return vertices1[0] - collision.normal * (collision.penetration * real(0.5));
+            return vertices1[0] + collision.normal * (collision.penetration * real(0.5));
         } else {
             return (vertices1[0] + vertices2[0]) * real(0.5);
         }
@@ -128,11 +131,11 @@ Vector2 CollisionSystem::Convex2Convex(const Context &context, const Collision &
     auto &location2 = context.getComponent<LocationComponent>(collision.second);
     auto &polygon2 = context.getComponent<PolygonComponent>(collision.second);
 
-    std::vector<Vector2> maxEdges1, maxEdges2;
-    getVerticesWithMaxProjection(polygon1, location1, collision.normal, maxEdges1);
-    getVerticesWithMaxProjection(polygon2, location2, -collision.normal, maxEdges2);
+    std::vector<Vector2> maxVertices1, maxVertices2;
+    getVerticesWithMaxProjection(polygon1, location1, collision.normal, maxVertices1);
+    getVerticesWithMaxProjection(polygon2, location2, -collision.normal, maxVertices2);
 
-    return getCollisionPointFromVertices(maxEdges1, maxEdges2, collision);
+    return getCollisionPointFromVertices(maxVertices1, maxVertices2, collision);
 }
 #endif
 #ifndef USE_CIRCLES_ONLY
@@ -147,7 +150,7 @@ Vector2 CollisionSystem::AABB2AABB(const Context &context, const Collision &coll
         auto y1 = std::max(aabb1.min.y, aabb2.min.y);
         auto y2 = std::min(aabb1.max.y, aabb2.max.y);
         auto y = (y1 + y2) * real(0.5);
-        if(axis.x > 0) {
+        if(axis.x < 0) {
             auto x = (aabb1.max.x + aabb2.min.x) * real(0.5);
             return {x, y};
         } else {
@@ -158,7 +161,7 @@ Vector2 CollisionSystem::AABB2AABB(const Context &context, const Collision &coll
         auto x1 = std::max(aabb1.min.x, aabb2.min.x);
         auto x2 = std::max(aabb1.max.x, aabb2.max.x);
         auto x = (x1 + x2) * real(0.5);
-        if(axis. y > 0) {
+        if(axis.y < 0) {
             auto y = (aabb1.max.y + aabb2.min.y) * real(0.5);
             return {x, y};
         } else {
@@ -174,7 +177,7 @@ Vector2 CollisionSystem::Circle2AABB(const Context &context, const Collision &co
 Vector2 CollisionSystem::AABB2Circle(const Context &context, const Collision &collision) {
     auto &shape2 = context.getComponent<ShapeComponent>(collision.second);
     auto displacement = collision.normal * -(shape2.radius - collision.penetration * real(0.5));
-    return shape2.centroid + displacement;
+    return shape2.centroid - displacement;
 }
 #endif
 #ifndef USE_PRIMITIVES_ONLY
@@ -187,28 +190,30 @@ Vector2 CollisionSystem::Convex2AABB(const Context &context, const Collision &co
     auto &shape2 = context.getComponent<ShapeComponent>(collision.second);
     auto aabb2 = shape2.boundingBox;
 
-    Vector2 aabb2Edges[4] = {aabb2.max, {aabb2.min.x, aabb2.max.y}, aabb2.min, {aabb2.max.x, aabb2.min.y}};
+    Vector2 aabb2Vertices[4] = {aabb2.max, {aabb2.min.x, aabb2.max.y}, aabb2.min, {aabb2.max.x, aabb2.min.y}};
     auto center2 = shape2.getCenter();
 
-    std::vector<Vector2> maxEdges1, maxEdges2;
-    getVerticesWithMaxProjection(polygon1, location1, collision.normal, maxEdges1);
-    auto axis2 = -collision.normal;
+    std::vector<Vector2> maxVertices1, maxVertices2;
+    getVerticesWithMaxProjection(polygon1, location1, -collision.normal, maxVertices1);
+    auto axis2 = collision.normal;
 #ifdef DOUBLE_PRECISION
     real maxProjection = DBL_MIN;
 #else
     real maxProjection = FLT_MIN;
 #endif
     real projection;
-    for (auto &edge : aabb2Edges) {
-        projection = Vector2::dotProduct(edge - center2, axis2);
-        if(projection > maxProjection) {
-            maxProjection = projection;
-            maxEdges2.clear();
-            maxEdges2.push_back(edge);
+    for (auto &vertex : aabb2Vertices) {
+        projection = Vector2::dotProduct(vertex - center2, axis2);
+        if(projection >= maxProjection - Epsilon) {
+            if(!almostEquals(projection, maxProjection)) {
+                maxProjection = projection;
+                maxVertices2.clear();
+            }
+            maxVertices2.push_back(vertex);
         }
     }
 
-    return getCollisionPointFromVertices(maxEdges1, maxEdges2, collision);
+    return getCollisionPointFromVertices(maxVertices1, maxVertices2, collision);
 }
 #endif
 #endif
@@ -216,7 +221,7 @@ Vector2 CollisionSystem::Convex2AABB(const Context &context, const Collision &co
 Vector2 CollisionSystem::Circle2Circle(const Context &context, const Collision &collision) {
     auto &shape1 = context.getComponent<ShapeComponent>(collision.first);
     auto displacement = collision.normal * (shape1.radius - collision.penetration * real(0.5));
-    return shape1.centroid + displacement;
+    return shape1.centroid - displacement;
 }
 #ifndef USE_PRIMITIVES_ONLY
 Vector2 CollisionSystem::Circle2Convex(const Context &context, const Collision &collision) {
@@ -225,7 +230,7 @@ Vector2 CollisionSystem::Circle2Convex(const Context &context, const Collision &
 Vector2 CollisionSystem::Convex2Circle(const Context &context, const Collision &collision) {
     auto &shape2 = context.getComponent<ShapeComponent>(collision.second);
     auto displacement = collision.normal * -(shape2.radius - collision.penetration * real(0.5));
-    return shape2.centroid + displacement;
+    return shape2.centroid - displacement;
 }
 #endif
 #endif
@@ -281,20 +286,19 @@ void CollisionSystem::updateVelocities(const Context &context, EntityId id1, Ent
                                        VelocityComponent &velocity1, VelocityComponent &velocity2) {
     auto relativeVelocity = Vector2::dotProduct(relativeVelocityVector, direction);
     auto needUpdateNormal = relativeVelocity > 0;
-#ifndef USE_FRICTION
+#if (!defined(USE_ROTATION) || !defined(USE_INERTIA)) && !defined(USE_FRICTION)
     if(!needUpdateNormal) return;
 #endif
     auto denominator = massInfo1.inverseMass + massInfo2.inverseMass;
 #if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
     auto needUseInertia1 = context.getComponent<ShapeComponent>(id1).shapeType != ShapeType::AABB;
     auto needUseInertia2 = context.getComponent<ShapeComponent>(id2).shapeType != ShapeType::AABB;
-    if(needUseInertia1) denominator += Vector2::crossProduct(direction * (massInfo1.inverseInertia * Vector2::crossProduct(r1, direction)), r1);
-    if(needUseInertia2) denominator += Vector2::crossProduct(direction * (massInfo2.inverseInertia * Vector2::crossProduct(r2, direction)), r2);
+    if(needUseInertia1) denominator += Vector2::crossProduct(r1, direction * (massInfo1.inverseInertia * Vector2::crossProduct(r1, direction)));
+    if(needUseInertia2) denominator += Vector2::crossProduct(r2, direction * (massInfo2.inverseInertia * Vector2::crossProduct(r2, direction)));
 #endif
 #ifdef NEED_COLLISION_MATERIAL_INFO
     auto matInfo = getMaterialInfo(context, id1, id2);
 #endif
-    if(needUpdateNormal) {
 #ifdef NEED_COLLISION_MATERIAL_INFO
 #ifdef USE_BOUNCINESS
         auto numerator = matInfo.hasInfo ? direction * ((1 + matInfo.bounciness) * relativeVelocity) :
@@ -306,20 +310,28 @@ void CollisionSystem::updateVelocities(const Context &context, EntityId id1, Ent
         auto numerator = direction * relativeVelocity;
 #endif
         auto impulse = numerator / denominator;
+    if(needUpdateNormal) {
         velocity1.linear += impulse * massInfo1.inverseMass;
         velocity2.linear += impulse * -massInfo2.inverseMass;
+    }
 #if defined(USE_ROTATION) && defined(USE_INERTIA)
         if(needUseInertia1) velocity1.angular += massInfo1.inverseInertia * Vector2::crossProduct(r1, impulse);
         if(needUseInertia2) velocity2.angular += -massInfo2.inverseInertia * Vector2::crossProduct(r2, impulse);
 #endif
-    }
 #ifdef USE_FRICTION
     if(matInfo.hasInfo) {
         auto relativeTangentialVelocityVector = relativeVelocityVector - (direction * relativeVelocity);
         auto tangential = relativeTangentialVelocityVector.getNormalized();
         if(std::isnan(tangential.x)) return;
         auto tangentialNumerator = relativeTangentialVelocityVector * (1 + matInfo.bounciness);
-        auto tangentialImpulse = tangentialNumerator / denominator;
+#if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
+        auto tangentialDenominator = massInfo1.inverseMass + massInfo2.inverseMass;
+        if(needUseInertia1) denominator += Vector2::crossProduct(r1, tangential * (massInfo1.inverseInertia * Vector2::crossProduct(r1, tangential)));
+        if(needUseInertia2) denominator += Vector2::crossProduct(r2, tangential * (massInfo2.inverseInertia * Vector2::crossProduct(r2, tangential)));
+#else
+        auto tangentialDenominator = denominator;
+#endif
+        auto tangentialImpulse = tangentialNumerator / tangentialDenominator;
         velocity1.linear += tangentialImpulse * (massInfo1.inverseMass * matInfo.friction);
         velocity2.linear += tangentialImpulse * (-massInfo2.inverseMass * matInfo.friction);
 #if defined(USE_ROTATION) && defined(USE_INERTIA)
@@ -335,19 +347,18 @@ void CollisionSystem::updateVelocity(const Context &context, EntityId id, Vector
 
     auto relativeVelocity = Vector2::dotProduct(relativeVelocityVector, direction);
     auto needUpdateNormal = relativeVelocity > 0;
-#ifndef USE_FRICTION
+#if (!defined(USE_ROTATION) || !defined(USE_INERTIA)) && !defined(USE_FRICTION)
     if(!needUpdateNormal) return;
 #endif
     auto denominator = massInfo.inverseMass;
 #if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
     auto needUseInertia = context.getComponent<ShapeComponent>(id).shapeType != ShapeType::AABB;
-    if(needUseInertia) denominator += Vector2::crossProduct(direction * (massInfo.inverseInertia * Vector2::crossProduct(r, direction)), r);
+    if(needUseInertia) denominator += Vector2::crossProduct(r, direction * (massInfo.inverseInertia * Vector2::crossProduct(r, direction)));
 #endif
 #ifdef NEED_COLLISION_MATERIAL_INFO
     auto hasMaterial = context.hasComponent<MaterialComponent>(id);
     auto &material = context.getComponent<MaterialComponent>(id);
 #endif
-    if(needUpdateNormal) {
 #ifdef NEED_COLLISION_MATERIAL_INFO
 #ifdef USE_BOUNCINESS
         auto numerator = hasMaterial ? direction * ((1 + material.bounciness) * relativeVelocity) :
@@ -359,18 +370,23 @@ void CollisionSystem::updateVelocity(const Context &context, EntityId id, Vector
         auto numerator = direction * relativeVelocity;
 #endif
         auto impulse = numerator / denominator;
-        velocity.linear += impulse * massInfo.inverseMass;
+    if(needUpdateNormal) velocity.linear += impulse * massInfo.inverseMass;
 #if defined(USE_ROTATION) && defined(USE_INERTIA)
         if(needUseInertia) velocity.angular += massInfo.inverseInertia * Vector2::crossProduct(r, impulse);
 #endif
-    }
 #ifdef USE_FRICTION
     if(hasMaterial) {
         auto relativeTangentialVelocityVector = relativeVelocityVector - (direction * relativeVelocity);
         auto tangential = relativeTangentialVelocityVector.getNormalized();
         if(std::isnan(tangential.x)) return;
         auto tangentialNumerator = relativeTangentialVelocityVector * (1 + material.bounciness);
-        auto tangentialImpulse = tangentialNumerator / denominator;
+#if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
+        auto tangentialDenominator = massInfo.inverseMass;
+        if(needUseInertia) denominator += Vector2::crossProduct(r, tangential * (massInfo.inverseInertia * Vector2::crossProduct(r, tangential)));
+#else
+        auto tangentialDenominator = denominator;
+#endif
+        auto tangentialImpulse = tangentialNumerator / tangentialDenominator;
         velocity.linear += tangentialImpulse * (massInfo.inverseMass * material.friction);
 #if defined(USE_ROTATION) && defined(USE_INERTIA)
         if(needUseInertia) velocity.angular += massInfo.inverseInertia * material.friction * Vector2::crossProduct(r, tangentialImpulse);
@@ -400,10 +416,14 @@ void CollisionSystem::update(Context &context, real deltaTime) {
         auto &location2 = context.getComponent<LocationComponent>(id2);
 #ifdef USE_COLLISION_HOOKE
         auto force = k * magnitude;
-#elif defined(USE_COLLISION_IMPULSE) && defined(USE_INERTIA)
+#elif defined(USE_COLLISION_IMPULSE)
         auto collisionPoint = getCollisionPoint(context, collision);
+#ifdef USE_INERTIA
         auto r1 = collisionPoint - location1.linear;
         auto r2 = collisionPoint - location2.linear;
+#else
+        const Vector2 r1{}, r2{};
+#endif
 #endif
 
         if(context.hasComponent<MassInfoComponent>(id1)) {
@@ -427,6 +447,10 @@ void CollisionSystem::update(Context &context, real deltaTime) {
                         velocity2.linear += dV2;
 #else
                         auto relativeVelocityVector = velocity2.linear - velocity1.linear;
+#ifdef USE_ROTATION
+                        relativeVelocityVector -= -Vector2{r1.y, -r1.x} * velocity1.angular;
+                        relativeVelocityVector += -Vector2{r2.y, -r2.x} * velocity2.angular;
+#endif
                         updateVelocities(context, id1, id2, relativeVelocityVector, direction,
                                          massInfo1, massInfo2, r1, r2, velocity1, velocity2);
 #endif
@@ -438,6 +462,9 @@ void CollisionSystem::update(Context &context, real deltaTime) {
 #else
                         VelocityComponent velocity2 {Vector2{}};
                         auto relativeVelocityVector = -velocity1.linear;
+#ifdef USE_ROTATION
+                        relativeVelocityVector -= -Vector2{r1.y, -r1.x} * velocity1.angular;
+#endif
                         updateVelocities(context, id1, id2, relativeVelocityVector, direction,
                                          massInfo1, massInfo2, r1, r2, velocity1, velocity2);
                         context.addComponent<VelocityComponent>(id2, velocity2);
@@ -453,6 +480,9 @@ void CollisionSystem::update(Context &context, real deltaTime) {
 #else
                         VelocityComponent velocity1 {Vector2{}};
                         auto relativeVelocityVector = velocity2.linear;
+#ifdef USE_ROTATION
+                        relativeVelocityVector += -Vector2{r2.y, -r2.x} * velocity2.angular;
+#endif
                         updateVelocities(context, id1, id2, relativeVelocityVector, direction,
                                          massInfo1, massInfo2, r1, r2, velocity1, velocity2);
                         context.addComponent<VelocityComponent>(id1, velocity1);
@@ -497,6 +527,9 @@ void CollisionSystem::update(Context &context, real deltaTime) {
                     velocity1.linear += dV1;
 #else
                     auto relativeVelocityVector = -velocity1.linear;
+#ifdef USE_ROTATION
+                    relativeVelocityVector -= -Vector2{r1.y, -r1.x} * velocity1.angular;
+#endif
                     updateVelocity(context, id1, relativeVelocityVector, direction, massInfo1, r1, velocity1);
 #endif
                 } else
@@ -531,6 +564,9 @@ void CollisionSystem::update(Context &context, real deltaTime) {
                     velocity2.linear += dV2;
 #else
                     auto relativeVelocityVector = -velocity2.linear;
+#ifdef USE_ROTATION
+                    relativeVelocityVector -= -Vector2{r2.y, -r2.x} * velocity2.angular;
+#endif
                     updateVelocity(context, id2, relativeVelocityVector, -direction, massInfo2, r2, velocity2);
 #endif
                 } else

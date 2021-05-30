@@ -64,9 +64,9 @@ void PhysicsEngine::deleteEntity(Entity entity) {
 }
 
 #ifndef USE_PRIMITIVES_ONLY
-Entity PhysicsEngine::createComplex(Vector2* edges, size_t count, Transform location) {
+Entity PhysicsEngine::createComplex(Vector2* vertices, size_t count, Transform location) {
     auto entity = Entity::create(context);
-    entity.makeConvex(edges, count);
+    entity.makeConvex(vertices, count);
     entity.setLocation(location);
     return entity;
 }

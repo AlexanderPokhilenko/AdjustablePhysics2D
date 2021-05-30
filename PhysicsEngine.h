@@ -17,7 +17,7 @@ public:
     static constexpr const real HoopInertiaCoefficient = real(1);
     static constexpr const real SolidSphereInertiaCoefficient = real(2) / real(5);
     static constexpr const real ThinSphereInertiaCoefficient = real(2) / real(3);
-    static constexpr const real DefaultInertiaCoefficient = CylinderInertiaCoefficient;
+    static constexpr const real DefaultInertiaCoefficient = SolidSphereInertiaCoefficient;
 #endif
     explicit PhysicsEngine(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
     void forEachEntity(const std::function<void(Entity&)>&);

@@ -95,15 +95,15 @@ void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& 
     for (size_t i = 0; i < size; ++i) {
 #ifdef USE_ROTATION
         edges[i] = localEdges[i].getRotated(angle) + position;
-        normals[i] = localNormals[i].getRotated(angle) + position;
+        normals[i] = localNormals[i].getRotated(angle);
 #else
         vertices[i] = localEdges[i] + position;
-        normals[i] = localNormals[i] + position;
+        normals[i] = localNormals[i];
 #endif
     }
 }
 
-void NarrowPhaseSystem::getMinMaxOnAxis(const Vector2 *edges, size_t count, const Vector2 &axis, real &min, real &max) {
+void NarrowPhaseSystem::getMinMaxOnAxis(const Vector2 *vertices, size_t count, const Vector2 &axis, real &min, real &max) {
 #ifdef DOUBLE_PRECISION
     min = DBL_MAX;
     max = -DBL_MAX;
@@ -112,7 +112,7 @@ void NarrowPhaseSystem::getMinMaxOnAxis(const Vector2 *edges, size_t count, cons
     max = -FLT_MAX;
 #endif
     for (size_t i = 0; i < count; ++i) {
-        auto value = Vector2::dotProduct(edges[i], axis);
+        auto value = Vector2::dotProduct(vertices[i], axis);
         if(value < min) min = value;
         if(value > max) max = value;
     }
@@ -169,7 +169,7 @@ void NarrowPhaseSystem::Convex2Convex(Context &context, EntityId id1, EntityId i
         if(!checkPenetration(min1, max1, min2, max2, axis, penetration, minDepth)) return;
     }
 
-    Collision collision {id1, id2, minDepth, -penetration};
+    Collision collision {id1, id2, minDepth, penetration};
     context.collisions.push_back(collision);
 }
 #endif
@@ -257,13 +257,13 @@ void NarrowPhaseSystem::Convex2AABB(Context &context, EntityId id1, EntityId id2
 #else
     auto position1 = context.getComponent<ShapeComponent>(id1).getCenter();
 #endif
-    Vector2 edges1[size];
-    Vector2 edges2[4] = {aabb2.max, {aabb2.min.x, aabb2.max.y}, aabb2.min, {aabb2.max.x, aabb2.min.y}};
+    Vector2 vertices1[size];
+    Vector2 vertices2[4] = {aabb2.max, {aabb2.min.x, aabb2.max.y}, aabb2.min, {aabb2.max.x, aabb2.min.y}};
     Vector2 normals[totalSize];
 #ifdef USE_ROTATION
-    getGlobalVectors(polygon1, position1, angle, edges1, normals);
+    getGlobalVectors(polygon1, position1, angle, vertices1, normals);
 #else
-    getGlobalVectors(polygon1, position1, vertices, normals);
+    getGlobalVectors(polygon1, position1, vertices1, normals);
 #endif
     normals[size] = {1, 0};
     normals[size+1] = {0, 1};
@@ -277,12 +277,12 @@ void NarrowPhaseSystem::Convex2AABB(Context &context, EntityId id1, EntityId id2
     Vector2 axis{}, penetration{};
     for (size_t i = 0; i < totalSize; ++i) {
         axis = normals[i];
-        getMinMaxOnAxis(edges1, size, axis, min1, max1);
-        getMinMaxOnAxis(edges2, 4, axis, min2, max2);
+        getMinMaxOnAxis(vertices1, size, axis, min1, max1);
+        getMinMaxOnAxis(vertices2, 4, axis, min2, max2);
         if(!checkPenetration(min1, max1, min2, max2, axis, penetration, minDepth)) return;
     }
 
-    Collision collision {id1, id2, minDepth, -penetration};
+    Collision collision {id1, id2, minDepth, penetration};
     context.collisions.push_back(collision);
 }
 #endif
@@ -295,9 +295,9 @@ void NarrowPhaseSystem::Circle2Circle(Context &context, EntityId id1, EntityId i
     auto sumR = shape1.radius + shape2.radius;
     auto displacement = shape2.centroid - shape1.centroid;
 
-    if(sumR * sumR >= displacement.getSqrMagnitude()) return;
+    if(sumR * sumR <= displacement.getSqrMagnitude()) return;
 
-    auto penetration = displacement.getMagnitude() - sumR;
+    auto penetration = sumR - displacement.getMagnitude();
     Collision collision {id1, id2, penetration, -displacement.getNormalized()};
     context.collisions.push_back(collision);
 }
@@ -325,10 +325,10 @@ void NarrowPhaseSystem::Convex2Circle(Context &context, EntityId id1, EntityId i
 #else
     auto position1 = context.getComponent<ShapeComponent>(id1).getCenter();
 #endif
-    Vector2 edges[size];
+    Vector2 vertices[size];
     Vector2 normals[size];
 #ifdef USE_ROTATION
-    getGlobalVectors(polygon1, position1, angle, edges, normals);
+    getGlobalVectors(polygon1, position1, angle, vertices, normals);
 #else
     getGlobalVectors(polygon1, position1, vertices, normals);
 #endif
@@ -341,12 +341,12 @@ void NarrowPhaseSystem::Convex2Circle(Context &context, EntityId id1, EntityId i
     Vector2 axis{}, penetration{};
     for (size_t i = 0; i < size; ++i) {
         axis = normals[i];
-        getMinMaxOnAxis(edges, size, axis, min1, max1);
+        getMinMaxOnAxis(vertices, size, axis, min1, max1);
         getMinMaxOnAxis(center2, radius2, axis, min2, max2);
         if(!checkPenetration(min1, max1, min2, max2, axis, penetration, minDepth)) return;
     }
 
-    Collision collision {id1, id2, minDepth, -penetration};
+    Collision collision {id1, id2, minDepth, penetration};
     context.collisions.push_back(collision);
 }
 #endif

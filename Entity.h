@@ -26,6 +26,8 @@ public:
     void removeComponent(ComponentType type);
 #ifndef USE_PRIMITIVES_ONLY
     void makeConvex(const Vector2 vertices[], size_t count);
+    void makeComplexFromAABB(Vector2 min, Vector2 max);
+    void makeComplexFromAABB();
 #endif
 #ifndef USE_CIRCLES_ONLY
     void makeAABB(Vector2 min, Vector2 max);

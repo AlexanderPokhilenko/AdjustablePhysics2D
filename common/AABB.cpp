@@ -18,6 +18,17 @@ Vector2 AABB::getHalfSize() const {
     };
 }
 
+real AABB::getArea() const {
+    auto size = getSize();
+    return size.x * size.y;
+}
+
+#ifdef USE_INERTIA
+real AABB::getInertia(real mass) const {
+    return mass * getSize().getSqrMagnitude() / real(12);
+}
+#endif
+
 AABB AABB::operator+(const Vector2 &vector) const {
     return {min + vector, max + vector};
 }

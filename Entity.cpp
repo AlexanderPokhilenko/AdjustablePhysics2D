@@ -26,12 +26,13 @@ void Entity::makeConvex(const Vector2 globalVertices[], size_t count) {
     if(count < 3) throw std::invalid_argument("Wrong vertices count!");
 
     size_t lastIndex = count - 1;
-    real crossProducts[lastIndex];
-    real area = 0;
-    Vector2 centroid{0, 0};
+    auto first = globalVertices[lastIndex], second = globalVertices[0];
+    auto crossProduct = Vector2::crossProduct(first, second);
+    real area = crossProduct;
+    Vector2 centroid = (first + second) * crossProduct;
     for (size_t i = 0; i < lastIndex; ++i) {
-        auto first = globalVertices[i], second = globalVertices[i + 1];
-        auto crossProduct = Vector2::crossProduct(first, second);
+        first = globalVertices[i], second = globalVertices[i + 1];
+        crossProduct = Vector2::crossProduct(first, second);
         centroid += (first + second) * crossProduct;
         area += crossProduct;
     }
@@ -40,26 +41,28 @@ void Entity::makeConvex(const Vector2 globalVertices[], size_t count) {
 
     auto vertices = new Vector2[count];
     auto normals = new Vector2[count];
-    vertices[lastIndex] = globalVertices[lastIndex] - centroid;
-    auto maxSqrMagnitude = vertices[lastIndex].getSqrMagnitude();
+    vertices[0] = globalVertices[0] - centroid;
+    auto maxSqrMagnitude = vertices[0].getSqrMagnitude();
     Vector2 edges[count];
 #ifdef USE_INERTIA
     auto inertia = real(0);
 #endif
-
-    for (size_t i = 0; i < lastIndex; ++i) {
+    for (size_t i = 1; i < count; ++i) {
         vertices[i] = globalVertices[i] - centroid;
 #ifdef USE_INERTIA
-        auto first = vertices[i], second = vertices[i + 1];
-        auto crossProduct = Vector2::crossProduct(first, second);
+        first = vertices[i - 1], second = vertices[i];
+        crossProduct = Vector2::crossProduct(first, second);
         inertia += crossProduct * (Vector2::dotProduct(first, first) + Vector2::dotProduct(first, second) + Vector2::dotProduct(second, second));
 #endif
         auto sqrMagnitude = vertices[i].getSqrMagnitude();
         if(sqrMagnitude > maxSqrMagnitude) maxSqrMagnitude = sqrMagnitude;
-        edges[i] = vertices[i + 1] - vertices[i];
+        edges[i - 1] = second - first;
     }
     edges[lastIndex] = vertices[0] - vertices[lastIndex];
 #ifdef USE_INERTIA
+    first = vertices[lastIndex], second = vertices[0];
+    crossProduct = Vector2::crossProduct(first, second);
+    inertia += crossProduct * (Vector2::dotProduct(first, first) + Vector2::dotProduct(first, second) + Vector2::dotProduct(second, second));
     inertia /= area;
 #endif
 
@@ -72,7 +75,7 @@ void Entity::makeConvex(const Vector2 globalVertices[], size_t count) {
         auto &edge = edges[i];
         normals[i] = (Vector2{-edge.y, edge.x}).getNormalized();
         if(!isConcave) {
-            auto crossProduct = Vector2::crossProduct(prevEdge, edge);
+            crossProduct = Vector2::crossProduct(prevEdge, edge);
             int newSign;
             if(crossProduct > 0) {
                 newSign = 1;
@@ -87,14 +90,13 @@ void Entity::makeConvex(const Vector2 globalVertices[], size_t count) {
     }
     if(isConcave) throw std::invalid_argument("Concave figures are prohibited!");
 
-    Polygon polygon{count, vertices, normals};
-    Shape shape;
+    context.addComponent<PolygonComponent>(id, count, vertices, normals);
+    auto &polygon = context.getComponent<PolygonComponent>(id);
+    Shape shape{};
     shape.shapeType = ShapeType::Complex;
     shape.centroid = centroid;
     shape.radius = polygon.getRadius();
     shape.boundingBox = polygon.getAABB();
-
-    context.addComponent<PolygonComponent>(id, polygon);
     context.addComponent<ShapeComponent>(id, shape);
 #ifdef USE_DENSITY
     if(context.hasComponent<MaterialComponent>(id) && context.hasComponent<MassInfoComponent>(id)) {
@@ -108,11 +110,46 @@ void Entity::makeConvex(const Vector2 globalVertices[], size_t count) {
 #ifdef USE_INERTIA
     if(context.hasComponent<MassInfoComponent>(id)) {
         auto &massInfo = context.getComponent<MassInfoComponent>(id);
-        inertia *= massInfo.mass / real(3);
+        inertia *= massInfo.mass / real(12);
         massInfo.inertia = inertia;
         massInfo.inverseInertia = real(1) / inertia;
     }
 #endif
+}
+
+void Entity::makeComplexFromAABB(Vector2 min, Vector2 max) {
+    if(max.x < min.x || max.y < min.y) throw std::invalid_argument("Wrong AABB vertices!");
+    Shape shape{};
+    shape.boundingBox = {min, max};
+    shape.shapeType = ShapeType::Complex;
+    shape.centroid = (max + min) * real(0.5);
+    shape.radius = (max - min).getMagnitude() * real(0.5);
+    context.addComponent<ShapeComponent>(id, shape);
+    if(!context.hasComponent<LocationComponent>(id)) context.addComponent<LocationComponent>(id, shape.centroid);
+    auto vertices = new Vector2[4] {max - shape.centroid, Vector2{min.x, max.y} - shape.centroid, min - shape.centroid, Vector2{max.x, min.y} - shape.centroid};
+    auto normals = new Vector2[4] {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+    context.addComponent<PolygonComponent>(id, 4, vertices, normals);
+#ifdef USE_DENSITY
+    if(context.hasComponent<MaterialComponent>(id) && context.hasComponent<MassInfoComponent>(id)) {
+        auto &material = context.getComponent<MaterialComponent>(id);
+        auto &massInfo = context.getComponent<MassInfoComponent>(id);
+        auto size = max - min;
+        auto area = size.x * size.y;
+        massInfo.mass = material.density * area;
+        massInfo.inverseMass = real(1) / massInfo.mass;
+#ifdef USE_INERTIA
+        massInfo.inertia = massInfo.mass * size.getSqrMagnitude() / real(12);
+        massInfo.inverseInertia = real(1) / massInfo.inertia;
+#endif
+    }
+#endif
+}
+
+void Entity::makeComplexFromAABB() {
+    if(!context.hasComponent<ShapeComponent>(id)) throw std::logic_error("Figure is not AABB!");
+    auto &shape = context.getComponent<ShapeComponent>(id);
+    if(shape.shapeType != ShapeType::AABB) throw std::logic_error("Figure is not AABB!");
+    makeComplexFromAABB(shape.boundingBox.min, shape.boundingBox.max);
 }
 #endif
 
@@ -226,9 +263,54 @@ void Entity::setMaterial(Material material) {
     if(context.hasComponent<MaterialComponent>(id) && context.hasComponent<MassInfoComponent>(id)) {
         auto oldDensity = context.getComponent<MaterialComponent>(id).density;
         auto &massInfo = context.getComponent<MassInfoComponent>(id);
-        massInfo.mass *= material.density / oldDensity;
+        auto k = material.density / oldDensity;
+        massInfo.mass *= k;
         massInfo.inverseMass = real(1) / massInfo.mass;
-    } //else check area?
+#ifdef USE_INERTIA
+        massInfo.inertia *= k;
+        massInfo.inverseInertia = real(1) / massInfo.inertia;
+#endif
+    } else if(context.hasComponent<ShapeComponent>(id)) {
+        auto &shape = context.getComponent<ShapeComponent>(id);
+        real area = 0, mass = 1;
+#ifdef USE_INERTIA
+        real inertia = PhysicsEngine::DefaultInertiaCoefficient;
+#endif
+#ifdef USE_PRIMITIVES_ONLY
+        shape.tryGetArea(area);
+        mass = area * material.density;
+#ifdef USE_INERTIA
+        shape.tryGetInertia(mass, inertia);
+#endif
+#else
+        if(!shape.tryGetArea(area)) {
+            if(context.hasComponent<PolygonComponent>(id)) {
+                auto &polygon = context.getComponent<PolygonComponent>(id);
+                area = polygon.getArea();
+                mass = area * material.density;
+#ifdef USE_INERTIA
+                inertia = polygon.getInertia(mass);
+#endif
+            } else {
+                throw std::logic_error("Not primitive shape has no polygon!");
+            }
+        }
+        else {
+            mass = area * material.density;
+#ifdef USE_INERTIA
+            shape.tryGetInertia(mass, inertia);
+#endif
+        }
+#endif
+        MassInfo massInfo{};
+        massInfo.mass = mass;
+        massInfo.inverseMass = real(1) / mass;
+#ifdef USE_INERTIA
+        massInfo.inertia = inertia;
+        massInfo.inverseInertia = real(1) / inertia;
+#endif
+        context.addComponent<MassInfoComponent>(id, massInfo);
+    }
 #endif
     context.addComponent<MaterialComponent>(id, material);
 }
@@ -240,6 +322,7 @@ void Entity::setLocation(Transform location) {
 
 void Entity::setVelocity(Transform velocity) {
     context.addComponent<VelocityComponent>(id, velocity);
+    if(!context.hasComponent<AccelerationComponent>(id)) context.addComponent<AccelerationComponent>(id);
 }
 
 void Entity::setAcceleration(Transform acceleration) {

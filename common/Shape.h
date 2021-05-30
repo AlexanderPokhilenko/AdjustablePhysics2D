@@ -20,6 +20,10 @@ struct Shape {
 #endif
 
     Vector2 getCenter() const;
+    bool tryGetArea(real &area) const;
+#ifdef USE_INERTIA
+    bool tryGetInertia(real mass, real &inertia) const;
+#endif
 
     Shape operator +(const Vector2& vector) const;
     Shape operator -(const Vector2& vector) const;
