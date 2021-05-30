@@ -82,8 +82,8 @@ void BroadPhaseSystem::tryAddToCell(EntityId id, real x, real y) {
 #ifndef USE_CIRCLES_ONLY
 void BroadPhaseSystem::addAABB(EntityId id, const Shape& shape) {
     auto boundingBox = shape.boundingBox;
-    for (real x = boundingBox.min.x; x < boundingBox.max.x; x += cellSizeX) {
-        for (real y = boundingBox.min.y; y < boundingBox.max.y; y += cellSizeY) {
+    for (real x = boundingBox.min.x - cellSizeX; x <= boundingBox.max.x + cellSizeX; x += cellSizeX) {
+        for (real y = boundingBox.min.y - cellSizeY; y <= boundingBox.max.y + cellSizeY; y += cellSizeY) {
             addToCell(id, x, y);
         }
     }
@@ -95,7 +95,7 @@ void BroadPhaseSystem::addCircle(EntityId id, const Shape& shape) {
     real step = cellSizeY > cellSizeX ? cellSizeX : cellSizeY;
     real x0 = shape.centroid.x;
     real y0 = shape.centroid.y;
-    real x = shape.radius;
+    real x = shape.radius + step;
     real y = 0;
     real err = 0;
     float i = 0;

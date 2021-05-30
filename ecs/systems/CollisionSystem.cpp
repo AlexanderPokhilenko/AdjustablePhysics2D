@@ -402,6 +402,12 @@ Vector2 CollisionSystem::getCollisionPoint(const Context &context, const Collisi
     handler_function handlerFunc = handlers[static_cast<size_t>(shape1.shapeType)][static_cast<size_t>(shape2.shapeType)];
     return (*handlerFunc)(context, collision);
 }
+
+void CollisionSystem::scaleRelativeVelocity(Vector2 &velocity, const Vector2 &normal, real penetrationVelocity) {
+    auto normalVelocity = Vector2::dotProduct(velocity, normal);
+    if(normalVelocity >= penetrationVelocity - Epsilon || normalVelocity <= Epsilon) return;
+    velocity += normal * (penetrationVelocity - normalVelocity);
+}
 #endif
 
 void CollisionSystem::update(Context &context, EntityId id, real deltaTime) { }
@@ -451,6 +457,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
                         relativeVelocityVector -= -Vector2{r1.y, -r1.x} * velocity1.angular;
                         relativeVelocityVector += -Vector2{r2.y, -r2.x} * velocity2.angular;
 #endif
+                        scaleRelativeVelocity(relativeVelocityVector, direction, magnitude / deltaTime);
                         updateVelocities(context, id1, id2, relativeVelocityVector, direction,
                                          massInfo1, massInfo2, r1, r2, velocity1, velocity2);
 #endif
@@ -465,6 +472,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
 #ifdef USE_ROTATION
                         relativeVelocityVector -= -Vector2{r1.y, -r1.x} * velocity1.angular;
 #endif
+                        scaleRelativeVelocity(relativeVelocityVector, direction, magnitude / deltaTime);
                         updateVelocities(context, id1, id2, relativeVelocityVector, direction,
                                          massInfo1, massInfo2, r1, r2, velocity1, velocity2);
                         context.addComponent<VelocityComponent>(id2, velocity2);
@@ -483,6 +491,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
 #ifdef USE_ROTATION
                         relativeVelocityVector += -Vector2{r2.y, -r2.x} * velocity2.angular;
 #endif
+                        scaleRelativeVelocity(relativeVelocityVector, direction, magnitude / deltaTime);
                         updateVelocities(context, id1, id2, relativeVelocityVector, direction,
                                          massInfo1, massInfo2, r1, r2, velocity1, velocity2);
                         context.addComponent<VelocityComponent>(id1, velocity1);
@@ -506,7 +515,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
                         context.addComponent<VelocityComponent>(id2, dV2);
 #elif defined(USE_COLLISION_IMPULSE)
                         VelocityComponent velocity1 {Vector2{}}, velocity2 {Vector2{}};
-                        auto relativeVelocityVector = collision.normal * (-collision.penetration / deltaTime);
+                        auto relativeVelocityVector = direction * (-magnitude / deltaTime);
                         updateVelocities(context, id1, id2, relativeVelocityVector, direction,
                                          massInfo1, massInfo2, r1, r2, velocity1, velocity2);
                         context.addComponent<VelocityComponent>(id1, velocity1);
@@ -530,6 +539,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
 #ifdef USE_ROTATION
                     relativeVelocityVector -= -Vector2{r1.y, -r1.x} * velocity1.angular;
 #endif
+                    scaleRelativeVelocity(relativeVelocityVector, direction, magnitude / deltaTime);
                     updateVelocity(context, id1, relativeVelocityVector, direction, massInfo1, r1, velocity1);
 #endif
                 } else
@@ -542,7 +552,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
                     context.addComponent<VelocityComponent>(id1, dV1);
 #elif defined(USE_COLLISION_IMPULSE)
                     VelocityComponent velocity1 {Vector2{}};
-                    auto relativeVelocityVector = collision.normal * (-collision.penetration / deltaTime);
+                    auto relativeVelocityVector = direction * (-magnitude / deltaTime);
                     updateVelocity(context, id1, relativeVelocityVector, direction, massInfo1, r1, velocity1);
                     context.addComponent<VelocityComponent>(id1, velocity1);
 #else
@@ -567,6 +577,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
 #ifdef USE_ROTATION
                     relativeVelocityVector -= -Vector2{r2.y, -r2.x} * velocity2.angular;
 #endif
+                    scaleRelativeVelocity(relativeVelocityVector, -direction, magnitude / deltaTime);
                     updateVelocity(context, id2, relativeVelocityVector, -direction, massInfo2, r2, velocity2);
 #endif
                 } else
@@ -579,7 +590,7 @@ void CollisionSystem::update(Context &context, real deltaTime) {
                     context.addComponent<VelocityComponent>(id2, dV2);
 #elif defined(USE_COLLISION_IMPULSE)
                     VelocityComponent velocity2 {Vector2{}};
-                    auto relativeVelocityVector = collision.normal * (-collision.penetration / deltaTime);
+                    auto relativeVelocityVector = direction * (-magnitude / deltaTime);
                     updateVelocity(context, id2, relativeVelocityVector, -direction, massInfo2, r2, velocity2);
                     context.addComponent<VelocityComponent>(id2, velocity2);
 #else

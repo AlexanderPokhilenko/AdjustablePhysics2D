@@ -30,6 +30,7 @@ private:
                                Vector2 r,
                                VelocityComponent &velocity);
     Vector2 getCollisionPoint(const Context &context, const Collision &collision);
+    static void scaleRelativeVelocity(Vector2 &velocity, const Vector2 &normal, real penetrationVelocity);
     using handler_function = Vector2 (*)(const Context&, const Collision&);
     handler_function handlers[3][3];
 #ifndef USE_PRIMITIVES_ONLY
