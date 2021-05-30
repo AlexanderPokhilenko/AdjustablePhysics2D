@@ -8,7 +8,6 @@ ComponentsBitset BroadPhaseSystem::createCurrentSystemBitset()
 }
 
 #ifdef USE_SPATIAL_HASHING
-#include <unordered_set>
 struct pair_hash {
     inline std::size_t operator()(const std::pair<EntityId ,EntityId> & v) const {
         return v.first * 31 + v.second;
@@ -23,7 +22,7 @@ System(createCurrentSystemBitset()), arrayLength(length) {
     cellSizeY = sizeY;
     inverseCellSizeX = 1 / sizeX;
     inverseCellSizeY = 1 / sizeY;
-    cells = new std::vector<EntityId>[arrayLength];
+    cells = new std::unordered_set<EntityId>[arrayLength];
 }
 #else
 BroadPhaseSystem::BroadPhaseSystem() : System(createCurrentSystemBitset()) { }
@@ -34,7 +33,6 @@ void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
 #ifdef USE_QUADTREE
 #error Not implemented! //TODO
 #elif defined(USE_SPATIAL_HASHING)
-
 #ifdef USE_CIRCLES_ONLY
     addCircle(id, shape);
 #elif defined(USE_AABB_ONLY)
@@ -69,13 +67,14 @@ size_t BroadPhaseSystem::getIndex(EntityId id, real x, real y) const {
 }
 
 void BroadPhaseSystem::addToCell(EntityId id, real x, real y) {
-    cells[getIndex(id, x, y)].push_back(id);
+    cells[getIndex(id, x, y)].insert(id);
 }
 
 void BroadPhaseSystem::tryAddToCell(EntityId id, real x, real y) {
-    auto& vector = cells[getIndex(id, x, y)];
-    if(!vector.empty() && vector.back() == id) return;
-    vector.push_back(id);
+    auto& cell = cells[getIndex(id, x, y)];
+    cell.insert(id);
+    //if(!vector.empty() && vector.back() == id) return;
+    //vector.push_back(id);
 }
 
 #pragma clang diagnostic push
@@ -135,7 +134,7 @@ void BroadPhaseSystem::addCircle(EntityId id, const Shape& shape) {
 void BroadPhaseSystem::setArrayLength(size_t length) {
     delete[] cells;
     arrayLength = length;
-    cells = new std::vector<EntityId>[length];
+    cells = new std::unordered_set<EntityId>[length];
 }
 
 #ifndef USE_UNIT_CELL_SIZE
@@ -169,10 +168,13 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
     context.possibleCollisions.clear();
     std::unordered_set<std::pair<EntityId, EntityId>, pair_hash> set;
     for (size_t i = 0; i < arrayLength; ++i) {
+        auto &currentCell = cells[i];
         auto size = cells[i].size();
         if(size < 2) continue;
-        for (int e1 = 0; e1 < size; ++e1) {
-            for (int e2 = e1 + 1; e2 < size; ++e2) {
+        for (auto it1 = currentCell.begin(); it1 != currentCell.end(); ++it1) {
+            auto it2 = it1;
+            for (++it2; it2 != currentCell.end(); ++it2) {
+                auto e1 = *it1, e2 = *it2;
                 if(e1 < e2) {
                     set.insert(std::make_pair(e1, e2));
                 } else {

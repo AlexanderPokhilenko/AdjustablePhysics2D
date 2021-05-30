@@ -2,6 +2,9 @@
 #define ADJUSTABLEPHYSICS2D_BROADPHASESYSTEM_H
 
 #include "System.h"
+#ifdef USE_SPATIAL_HASHING
+#include <unordered_set>
+#endif
 
 class BroadPhaseSystem : public System {
 private:
@@ -20,7 +23,7 @@ private:
     constexpr static const real cellSizeY = 1;
 #endif
     size_t arrayLength;
-    std::vector<EntityId>* cells;
+    std::unordered_set<EntityId>* cells;
     size_t getIndex(EntityId id, real x, real y) const;
     void addToCell(EntityId id, real x, real y);
     void tryAddToCell(EntityId id, real x, real y);
