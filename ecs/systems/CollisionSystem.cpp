@@ -326,8 +326,8 @@ void CollisionSystem::updateVelocities(const Context &context, EntityId id1, Ent
         auto tangentialNumerator = relativeTangentialVelocityVector * (1 + matInfo.bounciness);
 #if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
         auto tangentialDenominator = massInfo1.inverseMass + massInfo2.inverseMass;
-        if(needUseInertia1) denominator += Vector2::crossProduct(r1, tangential * (massInfo1.inverseInertia * Vector2::crossProduct(r1, tangential)));
-        if(needUseInertia2) denominator += Vector2::crossProduct(r2, tangential * (massInfo2.inverseInertia * Vector2::crossProduct(r2, tangential)));
+        if(needUseInertia1) tangentialDenominator += Vector2::crossProduct(r1, tangential * (massInfo1.inverseInertia * Vector2::crossProduct(r1, tangential)));
+        if(needUseInertia2) tangentialDenominator += Vector2::crossProduct(r2, tangential * (massInfo2.inverseInertia * Vector2::crossProduct(r2, tangential)));
 #else
         auto tangentialDenominator = denominator;
 #endif
@@ -382,7 +382,7 @@ void CollisionSystem::updateVelocity(const Context &context, EntityId id, Vector
         auto tangentialNumerator = relativeTangentialVelocityVector * (1 + material.bounciness);
 #if defined(USE_INERTIA) && !defined(USE_AABB_ONLY)
         auto tangentialDenominator = massInfo.inverseMass;
-        if(needUseInertia) denominator += Vector2::crossProduct(r, tangential * (massInfo.inverseInertia * Vector2::crossProduct(r, tangential)));
+        if(needUseInertia) tangentialDenominator += Vector2::crossProduct(r, tangential * (massInfo.inverseInertia * Vector2::crossProduct(r, tangential)));
 #else
         auto tangentialDenominator = denominator;
 #endif
