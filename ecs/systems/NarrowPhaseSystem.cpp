@@ -295,7 +295,7 @@ void NarrowPhaseSystem::Circle2Circle(Context &context, EntityId id1, EntityId i
     auto sumR = shape1.radius + shape2.radius;
     auto displacement = shape2.centroid - shape1.centroid;
 
-    if(sumR * sumR <= displacement.getSqrMagnitude()) return;
+    if(sumR * sumR < displacement.getSqrMagnitude()) return;
 
     auto penetration = sumR - displacement.getMagnitude();
     Collision collision {id1, id2, penetration, -displacement.getNormalized()};
