@@ -7,11 +7,14 @@
 #define COLLISION_CATEGORIES 8
 #endif
 
+using CollisionFilterBitset = std::bitset<COLLISION_CATEGORIES>;
+
 struct CollisionFilter {
-    std::bitset<COLLISION_CATEGORIES> category;
-    std::bitset<COLLISION_CATEGORIES> mask;
+    CollisionFilterBitset category;
+    CollisionFilterBitset mask;
     CollisionFilter();
-    CollisionFilter(std::bitset<COLLISION_CATEGORIES> category, std::bitset<COLLISION_CATEGORIES> mask);
+    CollisionFilter(CollisionFilterBitset category);
+    CollisionFilter(CollisionFilterBitset category, CollisionFilterBitset mask);
     bool check(const CollisionFilter &second) const;
 };
 

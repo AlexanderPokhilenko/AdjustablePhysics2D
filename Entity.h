@@ -58,6 +58,14 @@ public:
 #endif
     );
 #endif
+#ifdef USE_COLLISION_FILTER
+    void setCategory(const CollisionFilterBitset &category);
+    void addCategory(const CollisionFilterBitset &category);
+    void removeCategory(const CollisionFilterBitset &category);
+    void setMask(const CollisionFilterBitset &mask);
+    void addMask(const CollisionFilterBitset &mask);
+    void removeMask(const CollisionFilterBitset &mask);
+#endif
 };
 
 #endif //ADJUSTABLEPHYSICS2D_ENTITY_H

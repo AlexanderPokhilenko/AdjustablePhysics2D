@@ -5,7 +5,11 @@ CollisionFilter::CollisionFilter() : category(), mask() {
     mask.set();
 }
 
-CollisionFilter::CollisionFilter(std::bitset<8> category, std::bitset<8> mask) : category(category), mask(mask) { }
+CollisionFilter::CollisionFilter(CollisionFilterBitset category) : category(category), mask() {
+    mask.set();
+}
+
+CollisionFilter::CollisionFilter(CollisionFilterBitset category, CollisionFilterBitset mask) : category(category), mask(mask) { }
 
 bool CollisionFilter::check(const CollisionFilter &second) const {
     return (category & second.mask).any() && (second.category & mask).any();

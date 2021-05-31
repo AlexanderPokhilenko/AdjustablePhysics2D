@@ -377,3 +377,43 @@ void Entity::addForce(Vector2 force
 #endif
 }
 #endif
+
+#ifdef USE_COLLISION_FILTER
+void Entity::setCategory(const CollisionFilterBitset &category) {
+    if(context.hasComponent<CollisionFilterComponent>(id)) {
+        context.getComponent<CollisionFilterComponent>(id).category = category;
+    } else {
+        context.addComponent<CollisionFilterComponent>(id, category);
+    }
+}
+
+void Entity::addCategory(const CollisionFilterBitset &category) {
+    if(context.hasComponent<CollisionFilterComponent>(id)) {
+        context.getComponent<CollisionFilterComponent>(id).category |= category;
+    } else {
+        context.addComponent<CollisionFilterComponent>(id, category);
+    }
+}
+
+void Entity::removeCategory(const CollisionFilterBitset &category) {
+    if(context.hasComponent<CollisionFilterComponent>(id)) {
+        context.getComponent<CollisionFilterComponent>(id).category &= ~category;
+    }
+}
+
+void Entity::setMask(const CollisionFilterBitset &mask) {
+    if(!context.hasComponent<CollisionFilterComponent>(id)) context.addComponent<CollisionFilterComponent>(id);
+    context.getComponent<CollisionFilterComponent>(id).mask = mask;
+}
+
+void Entity::addMask(const CollisionFilterBitset &mask) {
+    if(!context.hasComponent<CollisionFilterComponent>(id)) context.addComponent<CollisionFilterComponent>(id);
+    context.getComponent<CollisionFilterComponent>(id).mask |= mask;
+}
+
+void Entity::removeMask(const CollisionFilterBitset &mask) {
+    if(context.hasComponent<CollisionFilterComponent>(id)) {
+        context.getComponent<CollisionFilterComponent>(id).mask &= ~mask;
+    }
+}
+#endif
