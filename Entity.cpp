@@ -66,7 +66,6 @@ void Entity::makeConvex(const Vector2 globalVertices[], size_t count) {
     inertia /= area;
 #endif
 
-
     bool isConcave = false;
     int sign = 0;
     auto &prevEdge = edges[lastIndex];
@@ -115,6 +114,9 @@ void Entity::makeConvex(const Vector2 globalVertices[], size_t count) {
         massInfo.inverseInertia = real(1) / inertia;
     }
 #endif
+#ifdef USE_COLLISION_FILTER
+    if(!context.hasComponent<CollisionFilterComponent>(id)) context.addComponent<CollisionFilterComponent>(id);
+#endif
 }
 
 void Entity::makeComplexFromAABB(Vector2 min, Vector2 max) {
@@ -142,6 +144,9 @@ void Entity::makeComplexFromAABB(Vector2 min, Vector2 max) {
         massInfo.inverseInertia = real(1) / massInfo.inertia;
 #endif
     }
+#endif
+#ifdef USE_COLLISION_FILTER
+    if(!context.hasComponent<CollisionFilterComponent>(id)) context.addComponent<CollisionFilterComponent>(id);
 #endif
 }
 
@@ -174,6 +179,9 @@ void Entity::makeAABB(Vector2 min, Vector2 max) {
         massInfo.inverseMass = real(1) / massInfo.mass;
     }
 #endif
+#ifdef USE_COLLISION_FILTER
+    if(!context.hasComponent<CollisionFilterComponent>(id)) context.addComponent<CollisionFilterComponent>(id);
+#endif
 }
 #endif
 
@@ -204,6 +212,9 @@ void Entity::makeCircle(real radius) {
         massInfo.inertia = inertia;
         massInfo.inverseInertia = real(1) / inertia;
     }
+#endif
+#ifdef USE_COLLISION_FILTER
+    if(!context.hasComponent<CollisionFilterComponent>(id)) context.addComponent<CollisionFilterComponent>(id);
 #endif
 }
 #endif

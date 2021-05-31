@@ -6,6 +6,9 @@
 #include "../../common/Material.h"
 #include "../../common/Polygon.h"
 #include "../../common/Transform.h"
+#ifdef USE_COLLISION_FILTER
+#include "../../common/CollisionFilter.h"
+#endif
 #include "Component.h"
 #include "ComponentType.h"
 
@@ -52,6 +55,13 @@ struct AccelerationComponent : Transform, Component<AccelerationComponent, Compo
 {
     using Transform::Transform;
     AccelerationComponent(const Transform& transform) : Transform(transform) { };
+};
+#endif
+#ifdef USE_COLLISION_FILTER
+struct CollisionFilterComponent : CollisionFilter, Component<CollisionFilterComponent, ComponentType::CollisionFilter>
+{
+    using CollisionFilter::CollisionFilter;
+    CollisionFilterComponent(const CollisionFilter& filter) : CollisionFilter(filter) { };
 };
 #endif
 #endif //ADJUSTABLEPHYSICS2D_COMPONENTS_H

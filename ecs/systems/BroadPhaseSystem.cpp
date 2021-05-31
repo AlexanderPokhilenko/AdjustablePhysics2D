@@ -174,6 +174,13 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
             auto it2 = it1;
             for (++it2; it2 != currentCell.end(); ++it2) {
                 auto e1 = *it1, e2 = *it2;
+#ifdef USE_COLLISION_FILTER
+                if(context.hasComponent<CollisionFilterComponent>(e1) && context.hasComponent<CollisionFilterComponent>(e2)) {
+                    auto &f1 = context.getComponent<CollisionFilterComponent>(e1);
+                    auto &f2 = context.getComponent<CollisionFilterComponent>(e2);
+                    if(!f1.check(f2)) continue;
+                }
+#endif
                 if(e1 < e2) {
                     set.insert(std::make_pair(e1, e2));
                 } else {

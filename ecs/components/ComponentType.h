@@ -15,6 +15,9 @@ enum class ComponentType {
 #ifdef USE_ACCELERATION
     Acceleration,
 #endif
+#ifdef USE_COLLISION_FILTER
+    CollisionFilter,
+#endif
     COUNT
 };
 

@@ -10,7 +10,7 @@ struct Transform {
     real angular;
     Transform(Vector2 linear, real angular);
 #endif
-    explicit Transform(Vector2 linear);
+    Transform(Vector2 linear);
 
     Transform operator -() const;
     Transform operator +(const Transform& second) const;

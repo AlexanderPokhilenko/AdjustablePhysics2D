@@ -36,8 +36,18 @@ NarrowPhaseSystem::NarrowPhaseSystem() : System(createCurrentSystemBitset()), ha
 void NarrowPhaseSystem::update(Context &context, EntityId id1, real deltaTime) {
 #ifndef USE_BROAD_PHASE
     auto entitiesSize = context.getEntitiesSize();
+#ifdef USE_COLLISION_FILTER
+    auto hasFilter1 = context.hasComponent<CollisionFilterComponent>(id1);
+    auto &filter1 = context.getComponent<CollisionFilterComponent>(id1);
+#endif
     for (size_t id2 = id1 + 1; id2 < entitiesSize; ++id2) {
         if(!context.checkEntity(id2, componentsBitset)) continue;
+#ifdef USE_COLLISION_FILTER
+        if(hasFilter1 && context.hasComponent<CollisionFilterComponent>(id2)) {
+            auto &filter2 = context.getComponent<CollisionFilterComponent>(id2);
+            if(!filter1.check(filter2)) continue;
+        }
+#endif
         handle(context, id1, id2, deltaTime);
     }
 #endif

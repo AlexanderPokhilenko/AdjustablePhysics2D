@@ -19,6 +19,9 @@ Context::Context(size_t entitiesCapacity, size_t freeCapacity) : freeIds(), inUs
 #ifdef USE_ACCELERATION
     components[static_cast<std::size_t>(ComponentType::Acceleration)] = new ComponentContainer<AccelerationComponent>(entitiesCapacity);
 #endif
+#ifdef USE_COLLISION_FILTER
+    components[static_cast<std::size_t>(ComponentType::CollisionFilter)] = new ComponentContainer<CollisionFilterComponent>(entitiesCapacity);
+#endif
 }
 
 size_t Context::getEntitiesSize() {
