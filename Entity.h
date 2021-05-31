@@ -5,10 +5,6 @@
 #include "ecs/components/ComponentType.h"
 #include "ecs/Context.h"
 
-#if defined(USE_DENSITY) || defined(USE_FRICTION) || defined(USE_FRICTION)
-#define USE_MATERIAL
-#endif
-
 struct Entity {
 friend class PhysicsEngine;
 private:
@@ -49,7 +45,19 @@ public:
 #endif
     void setLocation(Transform location);
     void setVelocity(Transform velocity);
+    void addImpulse(Vector2 linear
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+            , real angular = 0
+#endif
+    );
+#ifdef USE_ACCELERATION
     void setAcceleration(Transform acceleration);
+    void addForce(Vector2 force
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+    , real torque = 0
+#endif
+    );
+#endif
 };
 
 #endif //ADJUSTABLEPHYSICS2D_ENTITY_H

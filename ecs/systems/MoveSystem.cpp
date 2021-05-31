@@ -7,7 +7,9 @@ ComponentsBitset MoveSystem::createCurrentSystemBitset()
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Location));
     bitset.set(static_cast<size_t>(ComponentType::Velocity));
+#ifdef USE_ACCELERATION
     bitset.set(static_cast<size_t>(ComponentType::Acceleration));
+#endif
     return bitset;
 }
 
@@ -17,6 +19,7 @@ MoveSystem::MoveSystem() : System(createCurrentSystemBitset())
 void MoveSystem::update(Context &context, EntityId id, real deltaTime) {
     auto &location = context.getComponent<LocationComponent>(id);
     auto &velocity = context.getComponent<VelocityComponent>(id);
+#ifdef USE_ACCELERATION
     auto &acceleration = context.getComponent<AccelerationComponent>(id);
 #ifdef USE_EULER
     location += velocity * deltaTime;
@@ -40,5 +43,8 @@ void MoveSystem::update(Context &context, EntityId id, real deltaTime) {
     velocity += acceleration * halfStep;
 #else
 #error No moving algorithm is defined!
+#endif
+#else
+    location += velocity * deltaTime;
 #endif
 }

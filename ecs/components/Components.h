@@ -21,11 +21,13 @@ struct MassInfoComponent : MassInfo, Component<MassInfoComponent, ComponentType:
     MassInfoComponent(const MassInfo& massInfo) : MassInfo(massInfo) { };
 };
 
+#ifdef USE_MATERIAL
 struct MaterialComponent : Material, Component<MaterialComponent, ComponentType::Material>
 {
     using Material::Material;
     MaterialComponent(const Material& material) : Material(material) { };
 };
+#endif
 
 struct PolygonComponent : Polygon, Component<PolygonComponent, ComponentType::Polygon>
 {
@@ -45,9 +47,11 @@ struct VelocityComponent : Transform, Component<VelocityComponent, ComponentType
     VelocityComponent(const Transform& transform) : Transform(transform) { };
 };
 
+#ifdef USE_ACCELERATION
 struct AccelerationComponent : Transform, Component<AccelerationComponent, ComponentType::Acceleration>
 {
     using Transform::Transform;
     AccelerationComponent(const Transform& transform) : Transform(transform) { };
 };
+#endif
 #endif //ADJUSTABLEPHYSICS2D_COMPONENTS_H

@@ -44,10 +44,9 @@ void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
         addAABB(id, shape);
     }
 #endif
-
 #elif defined(USE_SWEEP_AND_PRUNE)
 #error Not implemented! //TODO
-#else
+#elif defined(USE_BROAD_PHASE)
 #warning Broad phase is disabled!
 #endif
 }

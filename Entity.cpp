@@ -322,9 +322,47 @@ void Entity::setLocation(Transform location) {
 
 void Entity::setVelocity(Transform velocity) {
     context.addComponent<VelocityComponent>(id, velocity);
+#ifdef USE_ACCELERATION
     if(!context.hasComponent<AccelerationComponent>(id)) context.addComponent<AccelerationComponent>(id);
+#endif
 }
 
+void Entity::addImpulse(Vector2 linear
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+        , real angular
+#endif
+) {
+    if(!context.hasComponent<MassInfoComponent>(id)) throw std::logic_error("Entity has no mass!");
+    if(!context.hasComponent<VelocityComponent>(id)) throw std::logic_error("Entity has no velocity!");
+    auto &massInfo = context.getComponent<MassInfoComponent>(id);
+    auto inverseMass = massInfo.inverseMass;
+    auto &velocity = context.getComponent<VelocityComponent>(id);
+    velocity.linear += linear * inverseMass;
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+    auto inverseInertia = massInfo.inverseInertia;
+    velocity.angular += angular * inverseInertia;
+#endif
+}
+
+#ifdef USE_ACCELERATION
 void Entity::setAcceleration(Transform acceleration) {
     context.addComponent<AccelerationComponent>(id, acceleration);
 }
+
+void Entity::addForce(Vector2 force
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+        , real torque
+#endif
+        ) {
+    if(!context.hasComponent<MassInfoComponent>(id)) throw std::logic_error("Entity has no mass!");
+    if(!context.hasComponent<AccelerationComponent>(id)) throw std::logic_error("Entity has no acceleration!");
+    auto &massInfo = context.getComponent<MassInfoComponent>(id);
+    auto inverseMass = massInfo.inverseMass;
+    auto &acceleration = context.getComponent<AccelerationComponent>(id);
+    acceleration.linear += force * inverseMass;
+#if defined(USE_ROTATION) && defined(USE_INERTIA)
+    auto inverseInertia = massInfo.inverseInertia;
+    acceleration.angular += torque * inverseInertia;
+#endif
+}
+#endif

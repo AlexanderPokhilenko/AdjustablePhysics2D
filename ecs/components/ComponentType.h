@@ -6,11 +6,15 @@
 enum class ComponentType {
     Shape,
     MassInfo,
+#ifdef USE_MATERIAL
     Material,
+#endif
     Polygon,
     Location,
     Velocity,
+#ifdef USE_ACCELERATION
     Acceleration,
+#endif
     COUNT
 };
 
