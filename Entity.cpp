@@ -5,6 +5,10 @@
 
 Entity::Entity(Context &entityContext, EntityId entityId) : context(entityContext), id(entityId) { }
 
+Entity::operator EntityId() const {
+    return id;
+}
+
 Entity Entity::create(Context &context) {
     return {context, context.createEntity()};
 }

@@ -15,6 +15,9 @@ enum class SystemType {
 #endif
     NarrowPhase,
     Collision,
+#ifdef USE_JOINT
+    Joint,
+#endif
     COUNT
 };
 

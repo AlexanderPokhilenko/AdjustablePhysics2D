@@ -1,6 +1,12 @@
 #include "Context.h"
 
 Context::Context(size_t entitiesCapacity, size_t freeCapacity) : freeIds(), inUse(), components()
+#ifdef USE_BROAD_PHASE
+    , possibleCollisions()
+#endif
+#ifdef USE_JOINT
+    , joints(freeCapacity)
+#endif
 {
     freeIds.reserve(freeCapacity);
     inUse.reserve(entitiesCapacity);

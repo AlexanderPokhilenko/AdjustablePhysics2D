@@ -25,6 +25,11 @@ public:
     Entity getEntity(EntityId id);
     void deleteEntity(EntityId id);
     static void deleteEntity(Entity entity);
+#ifdef USE_JOINT
+    void forEachJoint(const std::function<void(Joint&, Entity&, Entity&)>&);
+    void createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper = 0, real length = 0, Vector2 point1 = Vector2(), Vector2 point2 = Vector2());
+    DoubleKeyContainer<EntityId, Joint>& getJoints();
+#endif
 #ifndef USE_PRIMITIVES_ONLY
     Entity createComplex(Vector2* edges, size_t count, Transform location);
 #endif

@@ -7,6 +7,10 @@
 #include "components/Components.h"
 #include "components/ComponentType.h"
 #include "components/ComponentContainer.h"
+#ifdef USE_JOINT
+#include "../common/Joint.h"
+#include "components/DoubleKeyContainer.h"
+#endif
 #include "../common/Collision.h"
 
 class Context {
@@ -16,11 +20,14 @@ friend class BroadPhaseSystem;
 #endif
 friend class NarrowPhaseSystem;
 friend class CollisionSystem;
+#ifdef USE_JOINT
+friend class JointSystem;
+#endif
 private:
     std::vector<EntityId> freeIds;
     std::vector<ComponentsBitset> inUse;
     BaseComponentContainer* components[ComponentsCount];
-#if USE_BROAD_PHASE
+#ifdef USE_BROAD_PHASE
     std::vector<std::pair<EntityId, EntityId>> possibleCollisions;
 #endif
     std::vector<Collision> collisions;
@@ -29,6 +36,9 @@ private:
     template<typename T>
     const ComponentContainer<T>* getComponents() const;
 public:
+#ifdef USE_JOINT
+    DoubleKeyContainer<EntityId, Joint> joints;
+#endif
     explicit Context(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
     size_t getEntitiesSize();
     bool checkEntity(EntityId id, ComponentsBitset bitset);

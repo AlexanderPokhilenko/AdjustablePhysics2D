@@ -12,6 +12,9 @@
 #endif
 #include "ecs/systems/NarrowPhaseSystem.h"
 #include "ecs/systems/CollisionSystem.h"
+#ifdef USE_JOINT
+#include "ecs/systems/JointSystem.h"
+#endif
 
 PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
 systems() {
@@ -28,6 +31,9 @@ systems() {
 #endif
     systems[static_cast<std::size_t>(SystemType::NarrowPhase)] = new NarrowPhaseSystem();
     systems[static_cast<std::size_t>(SystemType::Collision)] = new CollisionSystem();
+#ifdef USE_JOINT
+    systems[static_cast<std::size_t>(SystemType::Joint)] = new JointSystem();
+#endif
 }
 
 void PhysicsEngine::forEachEntity(const std::function<void(Entity &)>& func) {
@@ -56,12 +62,35 @@ Entity PhysicsEngine::getEntity(EntityId id) {
 }
 
 void PhysicsEngine::deleteEntity(EntityId id) {
+#ifdef USE_JOINT
+    context.joints.tryRemoveAll(id);
+#endif
     return context.deleteEntity(id);
 }
 
 void PhysicsEngine::deleteEntity(Entity entity) {
+#ifdef USE_JOINT
+    entity.context.joints.tryRemoveAll(entity.id);
+#endif
     return entity.context.deleteEntity(entity.id);
 }
+
+#ifdef USE_JOINT
+void PhysicsEngine::forEachJoint(const std::function<void(Joint&, Entity&, Entity&)>& func) {
+    context.joints.forEach([this, &func](Joint &joint) {
+        Entity e1{context, joint.id1}, e2{context, joint.id2};
+        func(joint, e1, e2);
+    });
+}
+
+void PhysicsEngine::createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper, real length, Vector2 point1, Vector2 point2) {
+    context.joints.add(id1, id2, id1, id2, kSpring, kDamper, length, point1, point2);
+}
+
+DoubleKeyContainer<EntityId, Joint>& PhysicsEngine::getJoints() {
+    return context.joints;
+}
+#endif
 
 #ifndef USE_PRIMITIVES_ONLY
 Entity PhysicsEngine::createComplex(Vector2* vertices, size_t count, Transform location) {

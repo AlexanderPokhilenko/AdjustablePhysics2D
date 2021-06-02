@@ -1,8 +1,7 @@
 #ifndef ADJUSTABLEPHYSICS2D_BASECOMPONENTCONTAINER_H
 #define ADJUSTABLEPHYSICS2D_BASECOMPONENTCONTAINER_H
 
-class BaseComponentContainer
-{
+class BaseComponentContainer {
 public:
     virtual ~BaseComponentContainer() = default;
 };

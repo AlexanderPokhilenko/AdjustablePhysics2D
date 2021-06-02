@@ -9,9 +9,10 @@ struct Entity {
 friend class PhysicsEngine;
 private:
     Context &context;
-    const EntityId id;
 public:
+    const EntityId id;
     Entity(Context &entityContext, EntityId entityId);
+    explicit operator EntityId() const;
     static Entity create(Context &context);
     bool exists() const;
     bool hasComponent(ComponentType type) const;

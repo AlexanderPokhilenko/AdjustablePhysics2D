@@ -281,7 +281,7 @@ CollisionSystem::CollisionMaterialInfo CollisionSystem::getMaterialInfo(const Co
 
 void CollisionSystem::updateVelocities(const Context &context, EntityId id1, EntityId id2,
                                        Vector2 relativeVelocityVector, Vector2 direction,
-                                       MassInfoComponent &massInfo1, MassInfoComponent &massInfo2,
+                                       const MassInfoComponent &massInfo1, const MassInfoComponent &massInfo2,
                                        Vector2 r1, Vector2 r2,
                                        VelocityComponent &velocity1, VelocityComponent &velocity2) {
     auto relativeVelocity = Vector2::dotProduct(relativeVelocityVector, direction);
@@ -343,7 +343,7 @@ void CollisionSystem::updateVelocities(const Context &context, EntityId id1, Ent
 }
 
 void CollisionSystem::updateVelocity(const Context &context, EntityId id, Vector2 relativeVelocityVector, Vector2 direction,
-                                     MassInfoComponent &massInfo, Vector2 r, VelocityComponent &velocity) {
+                                     const MassInfoComponent &massInfo, Vector2 r, VelocityComponent &velocity) {
 
     auto relativeVelocity = Vector2::dotProduct(relativeVelocityVector, direction);
     auto needUpdateNormal = relativeVelocity > 0;

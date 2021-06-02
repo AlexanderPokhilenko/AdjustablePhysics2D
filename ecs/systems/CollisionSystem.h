@@ -21,12 +21,12 @@ private:
 #endif
     static void updateVelocities(const Context &context, EntityId id1, EntityId id2,
                                  Vector2 relativeVelocityVector, Vector2 direction,
-                                 MassInfoComponent &massInfo1, MassInfoComponent &massInfo2,
+                                 const MassInfoComponent &massInfo1, const MassInfoComponent &massInfo2,
                                  Vector2 r1, Vector2 r2,
                                  VelocityComponent &velocity1, VelocityComponent &velocity2);
     static void updateVelocity(const Context &context, EntityId id,
                                Vector2 relativeVelocityVector, Vector2 direction,
-                               MassInfoComponent &massInfo,
+                               const MassInfoComponent &massInfo,
                                Vector2 r,
                                VelocityComponent &velocity);
     Vector2 getCollisionPoint(const Context &context, const Collision &collision);
