@@ -27,7 +27,9 @@ public:
     static void deleteEntity(Entity entity);
 #ifdef USE_JOINT
     void forEachJoint(const std::function<void(Joint&, Entity&, Entity&)>&);
-    void createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper = 0, real length = 0, Vector2 point1 = Vector2(), Vector2 point2 = Vector2());
+    void createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper, real length, Vector2 point1 = Vector2(), Vector2 point2 = Vector2());
+    void createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper, Vector2 point1 = Vector2(), Vector2 point2 = Vector2());
+    void createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper = 0);
     DoubleKeyContainer<EntityId, Joint>& getJoints();
 #endif
 #ifndef USE_PRIMITIVES_ONLY

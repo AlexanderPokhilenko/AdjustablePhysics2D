@@ -87,6 +87,25 @@ void PhysicsEngine::createJoint(EntityId id1, EntityId id2, real kSpring, real k
     context.joints.add(id1, id2, id1, id2, kSpring, kDamper, length, point1, point2);
 }
 
+void PhysicsEngine::createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper, Vector2 point1, Vector2 point2) {
+    auto &location1 = context.getComponent<LocationComponent>(id1);
+    auto &location2 = context.getComponent<LocationComponent>(id2);
+    auto position1 = location1.linear;
+    auto position2 = location2.linear;
+#ifdef USE_ROTATION
+    position1 += point1.getRotated(location1.angular);
+    position2 += point2.getRotated(location2.angular);
+#else
+    position1 += point1;
+    position2 += point2;
+#endif
+    createJoint(id1, id2, kSpring, kDamper, (position2 - position1).getMagnitude(), point1, point2);
+}
+
+void PhysicsEngine::createJoint(EntityId id1, EntityId id2, real kSpring, real kDamper) {
+    createJoint(id1, id2, kSpring, kDamper, Vector2{0, 0}, Vector2{0, 0});
+}
+
 DoubleKeyContainer<EntityId, Joint>& PhysicsEngine::getJoints() {
     return context.joints;
 }
