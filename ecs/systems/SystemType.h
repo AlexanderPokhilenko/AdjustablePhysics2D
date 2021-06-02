@@ -18,6 +18,9 @@ enum class SystemType {
 #ifdef USE_JOINT
     Joint,
 #endif
+#ifdef USE_CONSTRAINT
+    Constraint,
+#endif
     COUNT
 };
 

@@ -67,6 +67,9 @@ public:
     void addMask(const CollisionFilterBitset &mask);
     void removeMask(const CollisionFilterBitset &mask);
 #endif
+#ifdef USE_CONSTRAINT
+    void setConstraint(Constraint constraint);
+#endif
 };
 
 #endif //ADJUSTABLEPHYSICS2D_ENTITY_H

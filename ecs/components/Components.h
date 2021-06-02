@@ -9,6 +9,9 @@
 #ifdef USE_COLLISION_FILTER
 #include "../../common/CollisionFilter.h"
 #endif
+#ifdef USE_CONSTRAINT
+#include "../../common/Constraint.h"
+#endif
 #include "Component.h"
 #include "ComponentType.h"
 
@@ -62,6 +65,13 @@ struct CollisionFilterComponent : CollisionFilter, Component<CollisionFilterComp
 {
     using CollisionFilter::CollisionFilter;
     CollisionFilterComponent(const CollisionFilter& filter) : CollisionFilter(filter) { };
+};
+#endif
+#ifdef USE_CONSTRAINT
+struct ConstraintComponent : Constraint, Component<ConstraintComponent, ComponentType::Constraint>
+{
+    using Constraint::Constraint;
+    ConstraintComponent(const Constraint& constraint) : Constraint(constraint) { };
 };
 #endif
 #endif //ADJUSTABLEPHYSICS2D_COMPONENTS_H

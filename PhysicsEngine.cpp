@@ -15,6 +15,9 @@
 #ifdef USE_JOINT
 #include "ecs/systems/JointSystem.h"
 #endif
+#ifdef USE_CONSTRAINT
+#include "ecs/systems/ConstraintSystem.h"
+#endif
 
 PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
 systems() {
@@ -33,6 +36,9 @@ systems() {
     systems[static_cast<std::size_t>(SystemType::Collision)] = new CollisionSystem();
 #ifdef USE_JOINT
     systems[static_cast<std::size_t>(SystemType::Joint)] = new JointSystem();
+#endif
+#ifdef USE_CONSTRAINT
+    systems[static_cast<std::size_t>(SystemType::Constraint)] = new ConstraintSystem();
 #endif
 }
 

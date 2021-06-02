@@ -18,6 +18,9 @@ enum class ComponentType {
 #ifdef USE_COLLISION_FILTER
     CollisionFilter,
 #endif
+#ifdef USE_CONSTRAINT
+    Constraint,
+#endif
     COUNT
 };
 

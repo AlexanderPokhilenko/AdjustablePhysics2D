@@ -4,6 +4,7 @@ ComponentsBitset GlobalGravitationSystem::createCurrentSystemBitset()
 {
     ComponentsBitset bitset;
     bitset.set(static_cast<size_t>(ComponentType::Velocity));
+    bitset.set(static_cast<size_t>(ComponentType::MassInfo));
     return bitset;
 }
 

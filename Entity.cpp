@@ -421,3 +421,24 @@ void Entity::removeMask(const CollisionFilterBitset &mask) {
     }
 }
 #endif
+
+#ifdef USE_CONSTRAINT
+void Entity::setConstraint(Constraint constraint) {
+    if((constraint.axis.x == 0 && constraint.axis.y == 0) || Vector2::almostEquals(constraint.axis, constraint.axis.getNormalized())) {
+        if(constraint.maxLinearVelocity < 0) throw std::invalid_argument("Constraint max linear velocity must be not negative!");
+#ifdef USE_ROTATION
+        if(constraint.maxAngularVelocity < 0) throw std::invalid_argument("Constraint max angular velocity must be not negative!");
+#endif
+
+#ifdef USE_ACCELERATION
+        if(constraint.maxLinearAcceleration < 0) throw std::invalid_argument("Constraint max linear acceleration must be not negative!");
+#ifdef USE_ROTATION
+        if(constraint.maxAngularAcceleration < 0) throw std::invalid_argument("Constraint max angular acceleration must be not negative!");
+#endif
+#endif
+        context.addComponent<ConstraintComponent>(id, constraint);
+    } else {
+        throw std::invalid_argument("Constraint axis was not normalized!");
+    }
+}
+#endif
