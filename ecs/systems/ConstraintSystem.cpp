@@ -3,7 +3,9 @@
 
 ComponentsBitset ConstraintSystem::createCurrentSystemBitset() {
     ComponentsBitset bitset;
+#ifdef USE_CONSTRAINT
     bitset.set(static_cast<size_t>(ComponentType::Constraint));
+#endif
     bitset.set(static_cast<size_t>(ComponentType::Velocity));
 #ifdef USE_ACCELERATION
     bitset.set(static_cast<size_t>(ComponentType::Acceleration));
@@ -15,6 +17,7 @@ ConstraintSystem::ConstraintSystem() : System(createCurrentSystemBitset())
 { }
 
 void ConstraintSystem::update(Context &context, EntityId id, real deltaTime) {
+#ifdef USE_CONSTRAINT
     auto &constraint = context.getComponent<ConstraintComponent>(id);
     auto &velocity = context.getComponent<VelocityComponent>(id);
 
@@ -44,6 +47,7 @@ void ConstraintSystem::update(Context &context, EntityId id, real deltaTime) {
         auto absAngularAcceleration = fabsr(acceleration.angular);
         if(absAngularAcceleration > constraint.maxAngularAcceleration) acceleration.angular *= constraint.maxAngularAcceleration / absAngularAcceleration;
     }
+#endif
 #endif
 #endif
 }

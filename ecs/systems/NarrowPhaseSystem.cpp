@@ -1,5 +1,5 @@
 #include "NarrowPhaseSystem.h"
-#include <cmath>
+#include "../../math/MathExtensions.h"
 #include <cfloat>
 
 ComponentsBitset NarrowPhaseSystem::createCurrentSystemBitset()

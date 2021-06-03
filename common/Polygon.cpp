@@ -1,6 +1,5 @@
 #include "Polygon.h"
 #include "../math/MathExtensions.h"
-#include <cmath>
 #include <cfloat>
 
 Polygon::Polygon() : count(0), vertices(nullptr), normals(nullptr)

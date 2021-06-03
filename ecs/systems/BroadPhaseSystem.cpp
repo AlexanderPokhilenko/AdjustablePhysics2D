@@ -30,9 +30,7 @@ BroadPhaseSystem::BroadPhaseSystem() : System(createCurrentSystemBitset()) { }
 
 void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
     auto &shape = context.getComponent<ShapeComponent>(id);
-#ifdef USE_QUADTREE
-#error Not implemented! //TODO
-#elif defined(USE_SPATIAL_HASHING)
+#ifdef USE_SPATIAL_HASHING
 #ifdef USE_CIRCLES_ONLY
     addCircle(id, shape);
 #elif defined(USE_AABB_ONLY)
@@ -45,6 +43,8 @@ void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
     }
 #endif
 #elif defined(USE_SWEEP_AND_PRUNE)
+#error Not implemented! //TODO
+#elif defined(USE_QUADTREE)
 #error Not implemented! //TODO
 #elif defined(USE_BROAD_PHASE)
 #warning Broad phase is disabled!
