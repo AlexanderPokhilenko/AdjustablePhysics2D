@@ -1,4 +1,5 @@
 #include "Polygon.h"
+#include "../math/MathExtensions.h"
 #include <cmath>
 #include <cfloat>
 
@@ -41,11 +42,7 @@ real Polygon::getInertia(real mass) const {
 
 #ifndef USE_CIRCLES_ONLY
 AABB Polygon::getAABB(real angle) const {
-#ifdef DOUBLE_PRECISION
-    Vector2 min = {DBL_MAX, DBL_MAX};
-#else
-    Vector2 min = {FLT_MAX, FLT_MAX};
-#endif
+    Vector2 min = {REAL_MAX, REAL_MAX};
     Vector2 max = {0, 0};
 
     for (size_t i = 0; i < count; ++i) {
@@ -69,11 +66,7 @@ real Polygon::getRadius() const {
         if(current > maxSqr) maxSqr = current;
     }
 
-#ifdef DOUBLE_PRECISION
-    return sqrt(maxSqr);
-#else
-    return sqrtf(maxSqr);
-#endif
+    return sqrtr(maxSqr);
 }
 #endif
 

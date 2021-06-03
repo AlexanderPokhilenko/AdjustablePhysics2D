@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-#ifdef DOUBLE_PRECISION
+#ifdef USE_DOUBLE_PRECISION
 using real = double;
 #else
 using real = float;

@@ -1,5 +1,5 @@
-#ifndef PHYSICSGUI1_CONTEXTTEMPLATESIMPL_H
-#define PHYSICSGUI1_CONTEXTTEMPLATESIMPL_H
+#ifndef ADJUSTABLEPHYSICS2D_CONTEXTTEMPLATESIMPL_H
+#define ADJUSTABLEPHYSICS2D_CONTEXTTEMPLATESIMPL_H
 
 template<typename T>
 ComponentContainer<T> *Context::getComponents() {
@@ -37,4 +37,4 @@ void Context::removeComponent(EntityId id) {
     inUse[id].reset(T::type);
 }
 
-#endif //PHYSICSGUI1_CONTEXTTEMPLATESIMPL_H
+#endif //ADJUSTABLEPHYSICS2D_CONTEXTTEMPLATESIMPL_H

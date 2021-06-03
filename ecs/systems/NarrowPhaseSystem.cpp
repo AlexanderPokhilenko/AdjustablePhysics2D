@@ -114,13 +114,8 @@ void NarrowPhaseSystem::getGlobalVectors(const Polygon& polygon, const Vector2& 
 }
 
 void NarrowPhaseSystem::getMinMaxOnAxis(const Vector2 *vertices, size_t count, const Vector2 &axis, real &min, real &max) {
-#ifdef DOUBLE_PRECISION
-    min = DBL_MAX;
-    max = -DBL_MAX;
-#else
-    min = FLT_MAX;
-    max = -FLT_MAX;
-#endif
+    min = REAL_MAX;
+    max = -REAL_MAX;
     for (size_t i = 0; i < count; ++i) {
         auto value = Vector2::dotProduct(vertices[i], axis);
         if(value < min) min = value;
@@ -157,11 +152,7 @@ void NarrowPhaseSystem::Convex2Convex(Context &context, EntityId id1, EntityId i
     getGlobalVectors(polygon1, position1, edges1, normals1);
     getGlobalVectors(polygon2, position2, edges2, normals2);
 #endif
-#ifdef DOUBLE_PRECISION
-    real minDepth = DBL_MAX;
-#else
-    real minDepth = FLT_MAX;
-#endif
+    real minDepth = REAL_MAX;
     real min1, max1, min2, max2;
     Vector2 axis{}, penetration{};
 
@@ -241,11 +232,7 @@ void NarrowPhaseSystem::AABB2Circle(Context &context, EntityId id1, EntityId id2
     auto normal = displacement - closest;
     auto sqrDistance = normal.getSqrMagnitude();
     if(sqrDistance > radius2 * radius2 && !inside) return;
-#ifdef DOUBLE_PRECISION
-    auto distance = sqrt(sqrDistance);
-#else
-    auto penetration = radius2 - sqrtf(sqrDistance);
-#endif
+    auto penetration = radius2 - sqrtr(sqrDistance);
     Collision collision {id1, id2, penetration, (inside ? normal : -normal).getNormalized()};
     context.collisions.push_back(collision);
 }
@@ -277,11 +264,7 @@ void NarrowPhaseSystem::Convex2AABB(Context &context, EntityId id1, EntityId id2
 #endif
     normals[size] = {1, 0};
     normals[size+1] = {0, 1};
-#ifdef DOUBLE_PRECISION
-    real minDepth = DBL_MAX;
-#else
-    real minDepth = FLT_MAX;
-#endif
+    real minDepth = REAL_MAX;
 
     real min1, max1, min2, max2;
     Vector2 axis{}, penetration{};
@@ -342,11 +325,7 @@ void NarrowPhaseSystem::Convex2Circle(Context &context, EntityId id1, EntityId i
 #else
     getGlobalVectors(polygon1, position1, vertices, normals);
 #endif
-#ifdef DOUBLE_PRECISION
-    real minDepth = DBL_MAX;
-#else
-    real minDepth = FLT_MAX;
-#endif
+    real minDepth = REAL_MAX;
     real min1, max1, min2, max2;
     Vector2 axis{}, penetration{};
     for (size_t i = 0; i < size; ++i) {

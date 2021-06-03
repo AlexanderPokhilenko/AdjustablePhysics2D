@@ -48,11 +48,7 @@ void CollisionSystem::getVerticesWithMaxProjection(const PolygonComponent &polyg
 #endif
     auto size = polygon.count;
     auto localVertices = polygon.vertices;
-#ifdef DOUBLE_PRECISION
-    real maxProjection = DBL_MIN;
-#else
-    real maxProjection = FLT_MIN;
-#endif
+    real maxProjection = REAL_MIN;
     real projection;
     for (size_t i = 0; i < size; ++i) {
 #ifdef USE_ROTATION
@@ -62,7 +58,7 @@ void CollisionSystem::getVerticesWithMaxProjection(const PolygonComponent &polyg
 #endif
         projection = Vector2::dotProduct(vertex, axis);
         if(projection >= maxProjection - Epsilon) {
-            if(!almostEquals(projection, maxProjection)) {
+            if(!almostEqualsr(projection, maxProjection)) {
                 maxProjection = projection;
                 vertices.clear();
             }
@@ -90,11 +86,7 @@ Vector2 CollisionSystem::getCollisionPointFromVertices(const std::vector<Vector2
         if(vertices2.size() > 1) {
             Vector2 tangential = {collision.normal.y, -collision.normal.x};
             size_t min1Index, max1Index, min2Index, max2Index;
-#ifdef DOUBLE_PRECISION
-            real min1(DBL_MAX), max1(DBL_MIN), min2(DBL_MAX), max2(DBL_MIN);
-#else
-            real min1(FLT_MAX), max1(FLT_MIN), min2(FLT_MAX), max2(FLT_MIN);
-#endif
+            real min1(REAL_MAX), max1(REAL_MIN), min2(REAL_MAX), max2(REAL_MIN);
             getMinMaxProjections(vertices1, tangential, min1, min1Index, max1, max1Index);
             getMinMaxProjections(vertices2, tangential, min2, min2Index, max2, max2Index);
             bool pickFirstMin = min1 > min2, pickFirstMax = max1 < max2;
@@ -196,16 +188,12 @@ Vector2 CollisionSystem::Convex2AABB(const Context &context, const Collision &co
     std::vector<Vector2> maxVertices1, maxVertices2;
     getVerticesWithMaxProjection(polygon1, location1, -collision.normal, maxVertices1);
     auto axis2 = collision.normal;
-#ifdef DOUBLE_PRECISION
-    real maxProjection = DBL_MIN;
-#else
-    real maxProjection = FLT_MIN;
-#endif
+    real maxProjection = REAL_MIN;
     real projection;
     for (auto &vertex : aabb2Vertices) {
         projection = Vector2::dotProduct(vertex - center2, axis2);
         if(projection >= maxProjection - Epsilon) {
-            if(!almostEquals(projection, maxProjection)) {
+            if(!almostEqualsr(projection, maxProjection)) {
                 maxProjection = projection;
                 maxVertices2.clear();
             }
@@ -256,11 +244,7 @@ CollisionSystem::CollisionMaterialInfo CollisionSystem::getMaterialInfo(const Co
 #endif
 #ifdef USE_FRICTION
             auto f2 = material2.friction;
-#ifdef DOUBLE_PRECISION
-            info.friction = sqrt(info.friction * info.friction + f2 * f2);
-#else
-            info.friction = sqrtf(info.friction * info.friction + f2 * f2);
-#endif
+            info.friction = sqrtr(info.friction * info.friction + f2 * f2);
 #endif
         }
     } else {

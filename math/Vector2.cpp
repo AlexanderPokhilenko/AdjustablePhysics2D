@@ -1,12 +1,8 @@
 #include "Vector2.h"
-#include <cmath>
+#include "MathExtensions.h"
 
 bool Vector2::almostEquals(const Vector2 &first, const Vector2 &second, real epsilon) {
-#ifdef DOUBLE_PRECISION
-    return fabs(first.x - second.x) <= epsilon && fabs(first.y - second.y) <= epsilon;
-#else
-    return fabsf(first.x - second.x) <= epsilon && fabsf(first.y - second.y) <= epsilon;
-#endif
+    return almostEqualsr(first.x, second.x, epsilon) && almostEqualsr(first.y, second.y, epsilon);
 }
 
 real Vector2::dotProduct(const Vector2 &first, const Vector2 &second) {
@@ -22,11 +18,7 @@ real Vector2::getSqrMagnitude() const {
 }
 
 real Vector2::getMagnitude() const {
-#ifdef DOUBLE_PRECISION
-    return sqrt(getSqrMagnitude());
-#else
-    return sqrtf(getSqrMagnitude());
-#endif
+    return sqrtr(getSqrMagnitude());
 }
 
 Vector2 Vector2::getNormalized() const {
@@ -43,14 +35,8 @@ void Vector2::normalize() {
 }
 
 Vector2 Vector2::getRotated(real angle) const {
-    real sinVal, cosVal;
-#ifdef DOUBLE_PRECISION
-    sinVal = sin(angle);
-    cosVal = cos(angle);
-#else
-    sinVal = sinf(angle);
-    cosVal = cosf(angle);
-#endif
+    real sinVal = sinr(angle);
+    real cosVal = cosr(angle);
     return {
         x * cosVal - y * sinVal,
         x * sinVal + y * cosVal
@@ -58,14 +44,8 @@ Vector2 Vector2::getRotated(real angle) const {
 }
 
 void Vector2::rotate(real angle) {
-    real sinVal, cosVal;
-#ifdef DOUBLE_PRECISION
-    sinVal = sin(angle);
-    cosVal = cos(angle);
-#else
-    sinVal = sinf(angle);
-    cosVal = cosf(angle);
-#endif
+    real sinVal = sinr(angle);
+    real cosVal = cosr(angle);
     real newX = x * cosVal - y * sinVal;
     real newY = x * sinVal + y * cosVal;
 
