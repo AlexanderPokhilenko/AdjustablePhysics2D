@@ -4,12 +4,27 @@
 #include "System.h"
 #ifdef USE_SPATIAL_HASHING
 #include <unordered_set>
+#elif defined(USE_SWEEP_AND_PRUNE)
+#include <map>
+#include <unordered_set>
 #endif
 
 class BroadPhaseSystem : public System {
 private:
     static ComponentsBitset createCurrentSystemBitset();
-#ifdef USE_SPATIAL_HASHING
+#if defined(USE_SPATIAL_HASHING) || defined(USE_SWEEP_AND_PRUNE)
+    struct pair_hash {
+        inline std::size_t operator()(const std::pair<EntityId ,EntityId> & p) const {
+            return p.first * 31 + p.second;
+        }
+    };
+    using unordered_pairs_set = std::unordered_set<std::pair<EntityId, EntityId>, pair_hash>;
+#endif
+#ifdef USE_SWEEP_AND_PRUNE
+    std::multimap<real, EntityId> axisX;
+    std::multimap<real, EntityId> axisY;
+    static void fillPairsFromAxis(const std::multimap<real, EntityId>& axis, unordered_pairs_set& set);
+#elif defined(USE_SPATIAL_HASHING)
     static const long P1 = 73856093;
     static const long P2 = 19349663;
 #ifndef USE_UNIT_CELL_SIZE

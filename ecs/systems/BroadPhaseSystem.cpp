@@ -8,12 +8,6 @@ ComponentsBitset BroadPhaseSystem::createCurrentSystemBitset()
 }
 
 #ifdef USE_SPATIAL_HASHING
-struct pair_hash {
-    inline std::size_t operator()(const std::pair<EntityId ,EntityId> & v) const {
-        return v.first * 31 + v.second;
-    }
-};
-
 BroadPhaseSystem::BroadPhaseSystem(size_t length, real sizeX, real sizeY) :
 System(createCurrentSystemBitset()), arrayLength(length) {
     if(sizeX <= 0) sizeX = DefaultCellSize;
@@ -36,14 +30,24 @@ void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
 #elif defined(USE_AABB_ONLY)
     addAABB(id, shape);
 #else
-    if(shape.shapeType == ShapeType::Circle){
+    if(shape.shapeType == ShapeType::Circle) {
         addCircle(id, shape);
     } else {
         addAABB(id, shape);
     }
 #endif
 #elif defined(USE_SWEEP_AND_PRUNE)
-#error Not implemented! //TODO
+#ifdef USE_CIRCLES_ONLY
+    axisX.insert({shape.centroid.x - shape.radius, id});
+    axisX.insert({shape.centroid.x + shape.radius, id});
+    axisY.insert({shape.centroid.y - shape.radius, id});
+    axisY.insert({shape.centroid.y + shape.radius, id});
+#else
+    axisX.insert({shape.boundingBox.min.x, id});
+    axisX.insert({shape.boundingBox.max.x, id});
+    axisY.insert({shape.boundingBox.min.y, id});
+    axisY.insert({shape.boundingBox.max.y, id});
+#endif
 #elif defined(USE_QUADTREE)
 #error Not implemented! //TODO
 #elif defined(USE_BROAD_PHASE)
@@ -156,16 +160,41 @@ System(createCurrentSystemBitset()), arrayLength(length) {
     cells = new std::vector<EntityId>[arrayLength];
 }
 #endif
+#elif defined(USE_SWEEP_AND_PRUNE)
+void BroadPhaseSystem::fillPairsFromAxis(const std::multimap<real, EntityId>& axis, unordered_pairs_set& set) {
+    std::unordered_set<EntityId> active;
+    for (const auto &item : axis) {
+        const auto id = item.second;
+        const auto cit = active.find(id);
+        if(cit == active.end()) {
+            for (const auto activeId : active) {
+                if(activeId > id) {
+                    set.insert(std::make_pair(id, activeId));
+                } else {
+                    set.insert(std::make_pair(activeId, id));
+                }
+            }
+            active.insert(id);
+        } else {
+            active.erase(cit);
+        }
+    }
+}
 #endif
 
 void BroadPhaseSystem::update(Context &context, real deltaTime) {
+#ifdef USE_BROAD_PHASE
+    context.possibleCollisions.clear();
+#endif
 #ifdef USE_SPATIAL_HASHING
     for (size_t i = 0; i < arrayLength; ++i) cells[i].clear();
+#elif defined(USE_SWEEP_AND_PRUNE)
+    axisX.clear();
+    axisY.clear();
 #endif
     System::update(context, deltaTime);
 #ifdef USE_SPATIAL_HASHING
-    context.possibleCollisions.clear();
-    std::unordered_set<std::pair<EntityId, EntityId>, pair_hash> set;
+    unordered_pairs_set set;
     for (size_t i = 0; i < arrayLength; ++i) {
         auto &currentCell = cells[i];
         auto size = cells[i].size();
@@ -190,6 +219,25 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
         }
     }
     context.possibleCollisions.insert(context.possibleCollisions.end(), set.begin(), set.end());
+#elif defined(USE_SWEEP_AND_PRUNE)
+    unordered_pairs_set pairsX, pairsY;
+
+    fillPairsFromAxis(axisX, pairsX);
+    fillPairsFromAxis(axisY, pairsY);
+
+    for (const auto &pair : pairsX) {
+        if(pairsY.find(pair) != pairsY.end()) {
+#ifdef USE_COLLISION_FILTER
+            auto e1 = pair.first, e2 = pair.second;
+            if(context.hasComponent<CollisionFilterComponent>(e1) && context.hasComponent<CollisionFilterComponent>(e2)) {
+                    auto &f1 = context.getComponent<CollisionFilterComponent>(e1);
+                    auto &f2 = context.getComponent<CollisionFilterComponent>(e2);
+                    if(!f1.check(f2)) continue;
+                }
+#endif
+            context.possibleCollisions.push_back(pair);
+        }
+    }
 #endif
 }
 
