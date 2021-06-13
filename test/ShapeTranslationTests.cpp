@@ -3,24 +3,10 @@
 #include "../src/ecs/systems/ShapeTranslationSystem.h"
 #include "../src/math/MathExtensions.h"
 
-constexpr size_t getShapesCount() {
-    size_t shapesCount = 0;
-#ifndef USE_PRIMITIVES_ONLY
-    shapesCount++;
-#endif
-#ifndef USE_CIRCLES_ONLY
-    shapesCount++;
-#endif
-#ifndef USE_AABB_ONLY
-    shapesCount++;
-#endif
-    return shapesCount;
-}
-
 TEST(ShapeTranslationSystemTest, MoveShapes) {
     Context context(3, 0);
 
-    const auto count = getShapesCount();
+    const auto count = ShapesCount;
 
     EntityId ids[count];
     for(auto &id : ids) id = context.createEntity();

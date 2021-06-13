@@ -23,7 +23,7 @@ friend class CollisionSystem;
 #ifdef USE_JOINT
 friend class JointSystem;
 #endif
-private:
+protected:
     std::vector<EntityId> freeIds;
     std::vector<ComponentsBitset> inUse;
     BaseComponentContainer* components[ComponentsCount];

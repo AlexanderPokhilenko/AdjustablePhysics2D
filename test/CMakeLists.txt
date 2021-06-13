@@ -8,6 +8,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(Tests ContextAndComponentsTests.cpp MoveSystemTests.cpp GravitationTests.cpp ShapeTranslationTests.cpp)
+add_executable(Tests ContextAndComponentsTests.cpp MoveSystemTests.cpp GravitationTests.cpp ShapeTranslationTests.cpp BroadPhaseTests.cpp)
 target_link_libraries(Tests gtest gmock_main PhysicsEngine)
 #add_test(NAME example_test COMMAND example)
