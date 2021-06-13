@@ -5,6 +5,13 @@
 Polygon::Polygon() : count(0), vertices(nullptr), normals(nullptr)
 { }
 
+Polygon::Polygon(const Polygon &polygon) : count(polygon.count), vertices(new Vector2[count]), normals(new Vector2[count]) {
+    for (int i = 0; i < count; ++i) {
+        vertices[i] = polygon.vertices[i];
+        normals[i] = polygon.normals[i];
+    }
+}
+
 Polygon::Polygon(size_t count, Vector2 *vertices, Vector2 *normals) : count(count), vertices(vertices), normals(normals)
 { }
 
@@ -69,8 +76,24 @@ real Polygon::getRadius() const {
 }
 #endif
 
-Polygon::~Polygon()
-{
+Polygon& Polygon::operator=(const Polygon &polygon) {
+    if(this != &polygon) {
+        delete[] vertices;
+        delete[] normals;
+
+        count = polygon.count;
+        vertices = new Vector2[count];
+        normals = new Vector2[count];
+
+        for (int i = 0; i < count; ++i) {
+            vertices[i] = polygon.vertices[i];
+            normals[i] = polygon.normals[i];
+        }
+    }
+    return *this;
+}
+
+Polygon::~Polygon() {
     delete[] vertices;
     delete[] normals;
 }

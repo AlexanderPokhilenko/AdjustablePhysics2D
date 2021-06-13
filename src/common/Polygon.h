@@ -12,6 +12,7 @@ struct Polygon
     Vector2* vertices;
     Vector2* normals;
     Polygon();
+    Polygon(const Polygon &polygon);
     Polygon(size_t count, Vector2 vertices[], Vector2 normals[]);
     real getArea() const;
 #ifdef USE_INERTIA
@@ -23,6 +24,7 @@ struct Polygon
 #ifndef USE_AABB_ONLY
     real getRadius() const;
 #endif
+    Polygon& operator=(const Polygon &polygon);
     ~Polygon();
 };
 

@@ -16,14 +16,20 @@ void ShapeTranslationSystem::update(Context &context, EntityId id, real deltaTim
     auto &shape = context.getComponent<ShapeComponent>(id);
 
 #if !defined(USE_PRIMITIVES_ONLY) && !defined(USE_CIRCLES_ONLY) && defined(USE_ROTATION)
-    // Updating AABB
     if(shape.shapeType == ShapeType::Complex) {
         auto &polygon = context.getComponent<PolygonComponent>(id);
         shape.boundingBox = polygon.getAABB(location.angular) + location.linear;
+#ifndef USE_AABB_ONLY
+        shape.centroid = location.linear;
+#endif
     } else
 #endif
     {
+#ifndef USE_CIRCLES_ONLY
         auto displacement = location.linear - shape.getCenter();
         shape += displacement;
+#else
+        shape.centroid = location.linear;
+#endif
     }
 }

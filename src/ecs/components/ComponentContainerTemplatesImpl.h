@@ -19,17 +19,8 @@ const T &ComponentContainer<T>::get(EntityId id) const {
 template<typename T>
 template<typename... Args>
 void ComponentContainer<T>::add(EntityId id, Args &&... args) {
-    auto index = components.size();
-    if(id <= index) {
-        components.template emplace_back(std::forward<Args>(args)...);
-        if(id < index) {
-            components[id] = std::move(components.back());
-            components.pop_back();
-        }
-    } else {
-        components.resize((size_t)id);
-        components.template emplace(components.end(), std::forward<Args>(args)...);
-    }
+    if(id >= components.size()) components.resize((size_t)(id + 1));
+    components[id] = T(args...);
 }
 
 #endif //ADJUSTABLEPHYSICS2D_COMPONENTCONTAINERTEMPLATESIMPL_H
