@@ -119,12 +119,55 @@ Quadtree::Quadtree(AABB worldSize, size_t threshold, size_t maxDepth, size_t ini
 
 void Quadtree::addShape(EntityId id, const Context &context) {
     const auto &shape = context.getComponent<ShapeComponent>(id);
-    root.addShape(id, shape, context, Threshold, MaxDepth);
+#ifdef USE_CIRCLES_ONLY
+    auto min = shape.centroid - Vector2{shape.radius, shape.radius}, max = shape.centroid + Vector2{shape.radius, shape.radius};
+#else
+    auto min = shape.boundingBox.min, max = shape.boundingBox.max;
+#endif
+    Vector2 displacement{0, 0};
+
+    if(min.x < root.bounds.min.x) {
+        displacement.x = root.bounds.min.x - min.x;
+    } else if(max.x > root.bounds.max.x) {
+        displacement.x = root.bounds.max.x - max.x;
+    }
+
+    if(min.y < root.bounds.min.y) {
+        displacement.y = root.bounds.min.y - min.y;
+    } else if(max.y > root.bounds.max.y) {
+        displacement.y = root.bounds.max.y - max.y;
+    }
+
+    if(displacement.x == 0 && displacement.y == 0) {
+        root.addShape(id, shape, context, Threshold, MaxDepth);
+    } else {
+        const auto newShape = shape + displacement;
+        root.addShape(id, newShape, context, Threshold, MaxDepth);
+    }
 }
 
 void Quadtree::addPoint(EntityId id, const Context &context) {
     const auto &position = context.getComponent<LocationComponent>(id).linear;
-    root.addPoint(id, position, context, Threshold, MaxDepth);
+    Vector2 displacement{0, 0};
+
+    if(position.x < root.bounds.min.x) {
+        displacement.x = root.bounds.min.x - position.x;
+    } else if(position.x > root.bounds.max.x) {
+        displacement.x = root.bounds.max.x - position.x;
+    }
+
+    if(position.y < root.bounds.min.y) {
+        displacement.y = root.bounds.min.y - position.y;
+    } else if(position.y > root.bounds.max.y) {
+        displacement.y = root.bounds.max.y - position.y;
+    }
+
+    if(displacement.x == 0 && displacement.y == 0) {
+        root.addPoint(id, position, context, Threshold, MaxDepth);
+    } else {
+        const auto newPosition = position + displacement;
+        root.addPoint(id, newPosition, context, Threshold, MaxDepth);
+    }
 }
 
 void Quadtree::removeShape(EntityId id) {
