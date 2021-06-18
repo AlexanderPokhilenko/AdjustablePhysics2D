@@ -132,6 +132,20 @@ Entity PhysicsEngine::createAABB(Vector2 min, Vector2 max, Transform location) {
     entity.setLocation(location);
     return entity;
 }
+
+Entity PhysicsEngine::createAABB(Vector2 size, Transform location) {
+    auto entity = Entity::create(context);
+    entity.makeAABB({0, 0}, size);
+    entity.setLocation(location);
+    return entity;
+}
+
+Entity PhysicsEngine::createAABB(Vector2 min, Vector2 max) {
+    auto entity = Entity::create(context);
+    entity.makeAABB(min, max);
+    entity.setLocation((min + max) * 0.5);
+    return entity;
+}
 #endif
 #ifndef USE_AABB_ONLY
 Entity PhysicsEngine::createCircle(real radius, Transform location) {

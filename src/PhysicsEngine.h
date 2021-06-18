@@ -37,6 +37,8 @@ public:
 #endif
 #ifndef USE_CIRCLES_ONLY
     Entity createAABB(Vector2 min, Vector2 max, Transform location);
+    Entity createAABB(Vector2 size, Transform location);
+    Entity createAABB(Vector2 min, Vector2 max);
 #endif
 #ifndef USE_AABB_ONLY
     Entity createCircle(real radius, Transform location);

@@ -48,7 +48,7 @@ void CollisionSystem::getVerticesWithMaxProjection(const PolygonComponent &polyg
 #endif
     auto size = polygon.count;
     auto localVertices = polygon.vertices;
-    real maxProjection = REAL_MIN;
+    real maxProjection = -REAL_MAX;
     real projection;
     for (size_t i = 0; i < size; ++i) {
 #ifdef USE_ROTATION
@@ -86,7 +86,7 @@ Vector2 CollisionSystem::getCollisionPointFromVertices(const std::vector<Vector2
         if(vertices2.size() > 1) {
             Vector2 tangential = {collision.normal.y, -collision.normal.x};
             size_t min1Index, max1Index, min2Index, max2Index;
-            real min1(REAL_MAX), max1(REAL_MIN), min2(REAL_MAX), max2(REAL_MIN);
+            real min1(REAL_MAX), max1(-REAL_MAX), min2(REAL_MAX), max2(-REAL_MAX);
             getMinMaxProjections(vertices1, tangential, min1, min1Index, max1, max1Index);
             getMinMaxProjections(vertices2, tangential, min2, min2Index, max2, max2Index);
             bool pickFirstMin = min1 > min2, pickFirstMax = max1 < max2;
@@ -188,7 +188,7 @@ Vector2 CollisionSystem::Convex2AABB(const Context &context, const Collision &co
     std::vector<Vector2> maxVertices1, maxVertices2;
     getVerticesWithMaxProjection(polygon1, location1, -collision.normal, maxVertices1);
     auto axis2 = collision.normal;
-    real maxProjection = REAL_MIN;
+    real maxProjection = -REAL_MAX;
     real projection;
     for (auto &vertex : aabb2Vertices) {
         projection = Vector2::dotProduct(vertex - center2, axis2);
