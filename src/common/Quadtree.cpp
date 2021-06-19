@@ -120,7 +120,7 @@ bool Quadtree::Node::removePoint(EntityId id) {
     }
 }
 
-void Quadtree::Node::forEachLeaf(const std::function<void(std::vector<EntityId>)>&func) const {
+void Quadtree::Node::forEachLeaf(const std::function<void(std::vector<EntityId> const &)>&func) const {
     if(isLeaf()) {
         func(values);
     } else {
@@ -212,7 +212,7 @@ void Quadtree::removePoint(EntityId id) {
     root.removePoint(id);
 }
 
-void Quadtree::forEachLeaf(const std::function<void(std::vector<EntityId>)> &func) const {
+void Quadtree::forEachLeaf(const std::function<void(std::vector<EntityId> const &)> &func) const {
     root.forEachLeaf(func);
 }
 

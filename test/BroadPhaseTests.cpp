@@ -1,6 +1,7 @@
 #ifdef USE_BROAD_PHASE
 #include "gtest/gtest.h"
 #include "../src/ecs/Context.h"
+#include "../src/math/MathExtensions.h"
 #include "../src/ecs/systems/BroadPhaseSystem.h"
 
 TEST(BroadPhaseSystemTest, PotentialCollisions) {

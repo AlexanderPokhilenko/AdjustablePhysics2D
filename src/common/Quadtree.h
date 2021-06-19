@@ -30,7 +30,7 @@ private:
         void addPoint(EntityId id, const Vector2& position, const Context& context, size_t threshold, size_t maxDepth, size_t depth = 0);
         bool removeShape(EntityId id);
         bool removePoint(EntityId id);
-        void forEachLeaf(const std::function<void(std::vector<EntityId>)>&) const;
+        void forEachLeaf(const std::function<void(std::vector<EntityId> const &)>&) const;
         void softClear();
         void hardClear();
         ~Node();
@@ -43,7 +43,7 @@ public:
     void addPoint(EntityId id, const Context& context);
     void removeShape(EntityId id);
     void removePoint(EntityId id);
-    void forEachLeaf(const std::function<void(std::vector<EntityId>)>&) const;
+    void forEachLeaf(const std::function<void(std::vector<EntityId> const &)>&) const;
     void softClear();
     void hardClear();
 };

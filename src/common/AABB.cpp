@@ -1,7 +1,7 @@
 #include "AABB.h"
 
 Vector2 AABB::getCenter() const {
-    return (max - min) / 2;
+    return (max + min) * real(0.5);
 }
 
 Vector2 AABB::getSize() const {
