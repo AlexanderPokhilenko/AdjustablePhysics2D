@@ -19,6 +19,10 @@ private:
         const real radius;
         const Vector2 center;
 #endif
+    private:
+        enum class Direction { NorthEast, NorthWest, SouthWest, SouthEast };
+        inline void add(EntityId id) { values.push_back(id); }
+    public:
         explicit Node(AABB bounds, size_t capacity = 0);
         inline bool isLeaf() const { return children[0] == nullptr; }
         void createChildren();
@@ -32,8 +36,9 @@ private:
         ~Node();
     };
     Node root;
+    real epsilon;
 public:
-    explicit Quadtree(AABB worldSize, size_t threshold = 16, size_t maxDepth = 8, size_t initialCapacity = 64);
+    explicit Quadtree(AABB worldBounds, size_t threshold = 16, size_t maxDepth = 8, size_t initialCapacity = 64);
     void addShape(EntityId id, const Context& context);
     void addPoint(EntityId id, const Context& context);
     void removeShape(EntityId id);

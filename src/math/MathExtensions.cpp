@@ -33,6 +33,14 @@ real cosr(real value) {
 #endif
 }
 
+real powr(real basis, real exponent) {
+#ifdef USE_DOUBLE_PRECISION
+    return pow(basis, exponent);
+#else
+    return powf(basis, exponent);
+#endif
+}
+
 bool almostEqualsr(real first, real second, real epsilon) {
     return fabsr(first - second) <= epsilon;
 }

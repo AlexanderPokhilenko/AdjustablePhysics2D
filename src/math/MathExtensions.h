@@ -17,6 +17,7 @@ real fabsr(real value);
 real sqrtr(real value);
 real sinr(real value);
 real cosr(real value);
+real powr(real basis, real exponent);
 bool almostEqualsr(real first, real second, real epsilon = Epsilon);
 
 #endif //ADJUSTABLEPHYSICS2D_MATHEXTENSIONS_H
