@@ -2,24 +2,27 @@
 #define ADJUSTABLEPHYSICS2D_BROADPHASESYSTEM_H
 
 #include "System.h"
-#ifdef USE_SPATIAL_HASHING
-#include <unordered_set>
-#elif defined(USE_SWEEP_AND_PRUNE)
+#ifdef USE_SWEEP_AND_PRUNE
 #include <map>
-#include <unordered_set>
+#elif defined(USE_QUADTREE)
+#include "../../common/Quadtree.h"
 #endif
+#include <unordered_set>
 
 class BroadPhaseSystem : public System {
 private:
+#ifdef USE_QUADTREE
+    Quadtree *const quadtree;
+    const size_t hardClearPeriod;
+    size_t iterationNumber;
+#endif
     static ComponentsBitset createCurrentSystemBitset();
-#if defined(USE_SPATIAL_HASHING) || defined(USE_SWEEP_AND_PRUNE)
     struct pair_hash {
         inline std::size_t operator()(const std::pair<EntityId ,EntityId> & p) const {
             return p.first * 31 + p.second;
         }
     };
     using unordered_pairs_set = std::unordered_set<std::pair<EntityId, EntityId>, pair_hash>;
-#endif
 #ifdef USE_SWEEP_AND_PRUNE
     std::multimap<real, EntityId> axisX;
     std::multimap<real, EntityId> axisY;
@@ -52,9 +55,7 @@ private:
 protected:
     void update(Context &context, EntityId id, real deltaTime) override;
 public:
-#ifndef USE_SPATIAL_HASHING
-    BroadPhaseSystem();
-#else
+#ifdef USE_SPATIAL_HASHING
 #ifndef USE_UNIT_CELL_SIZE
     explicit BroadPhaseSystem(size_t arrayLength = 32, real cellSizeX = DefaultCellSize, real cellSizeY = 0);
     void setCellSize(real size);
@@ -63,6 +64,10 @@ public:
     explicit BroadPhaseSystem(size_t arrayLength = 32);
 #endif
     void setArrayLength(size_t length);
+#elif defined(USE_SWEEP_AND_PRUNE)
+    BroadPhaseSystem();
+#elif defined(USE_QUADTREE)
+    BroadPhaseSystem(Quadtree *quadtree = nullptr, size_t hardClearPeriod = 15);
 #endif
     void update(Context &context, real deltaTime) override;
     ~BroadPhaseSystem() override;

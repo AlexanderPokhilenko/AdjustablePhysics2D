@@ -19,8 +19,15 @@
 #include "ecs/systems/ConstraintSystem.h"
 #endif
 
-PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity) : context(entitiesCapacity, freeCapacity),
+PhysicsEngine::PhysicsEngine(size_t entitiesCapacity, size_t freeCapacity
+#ifdef USE_QUADTREE
+, Quadtree *quadtree, size_t quadtreeHardClearPeriod
+#endif
+) : context(entitiesCapacity, freeCapacity),
 systems() {
+#ifdef USE_QUADTREE
+    if(quadtree == nullptr) quadtree = new Quadtree({{-100, -100}, {100, 100}});
+#endif
     systems[static_cast<std::size_t>(SystemType::Move)] = new MoveSystem();
 #ifdef USE_GLOBAL_GRAVITATION
     systems[static_cast<std::size_t>(SystemType::GlobalGravitation)] = new GlobalGravitationSystem();
@@ -30,7 +37,12 @@ systems() {
 #endif
     systems[static_cast<std::size_t>(SystemType::ShapeTranslation)] = new ShapeTranslationSystem();
 #ifdef USE_BROAD_PHASE
-    systems[static_cast<std::size_t>(SystemType::BroadPhase)] = new BroadPhaseSystem();
+    systems[static_cast<std::size_t>(SystemType::BroadPhase)]
+#ifdef USE_QUADTREE
+            = new BroadPhaseSystem(quadtree, quadtreeHardClearPeriod);
+#else
+            = new BroadPhaseSystem();
+#endif
 #endif
     systems[static_cast<std::size_t>(SystemType::NarrowPhase)] = new NarrowPhaseSystem();
     systems[static_cast<std::size_t>(SystemType::Collision)] = new CollisionSystem();

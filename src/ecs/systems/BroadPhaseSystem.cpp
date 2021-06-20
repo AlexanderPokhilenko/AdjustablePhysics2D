@@ -18,12 +18,17 @@ System(createCurrentSystemBitset()), arrayLength(length) {
     inverseCellSizeY = 1 / sizeY;
     cells = new std::unordered_set<EntityId>[arrayLength];
 }
-#else
+#elif defined(USE_SWEEP_AND_PRUNE)
 BroadPhaseSystem::BroadPhaseSystem() : System(createCurrentSystemBitset()) { }
+#elif defined(USE_QUADTREE)
+BroadPhaseSystem::BroadPhaseSystem(Quadtree *quadtree, size_t hardClearPeriod) : System(createCurrentSystemBitset()),
+quadtree(quadtree != nullptr ? quadtree : new Quadtree({{-100, -100}, {100, 100}})), hardClearPeriod(hardClearPeriod), iterationNumber(0) { }
 #endif
 
 void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
+#ifndef USE_QUADTREE
     auto &shape = context.getComponent<ShapeComponent>(id);
+#endif
 #ifdef USE_SPATIAL_HASHING
 #ifdef USE_CIRCLES_ONLY
     addCircle(id, shape);
@@ -49,7 +54,7 @@ void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
     axisY.insert({shape.boundingBox.max.y, id});
 #endif
 #elif defined(USE_QUADTREE)
-#error Not implemented! //TODO
+    quadtree->addShape(id, context);
 #elif defined(USE_BROAD_PHASE)
 #warning Broad phase is disabled!
 #endif
@@ -191,6 +196,14 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
 #elif defined(USE_SWEEP_AND_PRUNE)
     axisX.clear();
     axisY.clear();
+#elif defined(USE_QUADTREE)
+    if(iterationNumber >= hardClearPeriod) {
+        quadtree->hardClear();
+        iterationNumber = 0;
+    } else {
+        quadtree->softClear();
+        iterationNumber++;
+    }
 #endif
     System::update(context, deltaTime);
 #ifdef USE_SPATIAL_HASHING
@@ -238,11 +251,38 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
             context.possibleCollisions.push_back(pair);
         }
     }
+#elif defined(USE_QUADTREE)
+    unordered_pairs_set set;
+    quadtree->forEachLeaf([&set](const std::vector<EntityId>& vec) {
+        auto size = vec.size();
+        if(size < 2) return;
+        for (auto it1 = vec.begin(); it1 != vec.end(); ++it1) {
+            auto it2 = it1;
+            for (++it2; it2 != vec.end(); ++it2) {
+                auto e1 = *it1, e2 = *it2;
+#ifdef USE_COLLISION_FILTER
+                if(context.hasComponent<CollisionFilterComponent>(e1) && context.hasComponent<CollisionFilterComponent>(e2)) {
+                    auto &f1 = context.getComponent<CollisionFilterComponent>(e1);
+                    auto &f2 = context.getComponent<CollisionFilterComponent>(e2);
+                    if(!f1.check(f2)) continue;
+                }
+#endif
+                if(e1 < e2) {
+                    set.insert(std::make_pair(e1, e2));
+                } else {
+                    set.insert(std::make_pair(e2, e1));
+                }
+            }
+        }
+    });
+    context.possibleCollisions.insert(context.possibleCollisions.end(), set.begin(), set.end());
 #endif
 }
 
 BroadPhaseSystem::~BroadPhaseSystem() {
 #ifdef USE_SPATIAL_HASHING
     delete[] cells;
+#elif defined(USE_QUADTREE)
+    delete quadtree;
 #endif
 }

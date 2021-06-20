@@ -130,11 +130,13 @@ void Quadtree::Node::forEachLeaf(const std::function<void(std::vector<EntityId> 
 
 void Quadtree::Node::softClear() {
     values.clear();
+    if(isLeaf()) return;
     for(auto &child : children) child->softClear();
 }
 
 void Quadtree::Node::hardClear() {
     values.clear();
+    if(isLeaf()) return;
     for (auto &child : children) delete child;
     for(auto &child : children) child = nullptr;
 }
@@ -154,22 +156,22 @@ Quadtree::Quadtree(AABB worldBounds, size_t threshold, size_t maxDepth, size_t i
 void Quadtree::addShape(EntityId id, const Context &context) {
     const auto &shape = context.getComponent<ShapeComponent>(id);
 #ifdef USE_CIRCLES_ONLY
-    auto min = shape.centroid - Vector2{shape.radius, shape.radius}, max = shape.centroid + Vector2{shape.radius, shape.radius};
+    auto min = shape.centroid, max = shape.centroid;
 #else
     auto min = shape.boundingBox.min, max = shape.boundingBox.max;
 #endif
     Vector2 displacement{0, 0};
 
-    if(min.x < root.bounds.min.x) {
-        displacement.x = root.bounds.min.x - min.x;
-    } else if(max.x > root.bounds.max.x) {
-        displacement.x = root.bounds.max.x - max.x;
+    if(max.x < root.bounds.min.x) {
+        displacement.x = root.bounds.min.x - max.x + epsilon;
+    } else if(min.x > root.bounds.max.x) {
+        displacement.x = root.bounds.max.x - min.x - epsilon;
     }
 
-    if(min.y < root.bounds.min.y) {
-        displacement.y = root.bounds.min.y - min.y;
-    } else if(max.y > root.bounds.max.y) {
-        displacement.y = root.bounds.max.y - max.y;
+    if(max.y < root.bounds.min.y) {
+        displacement.y = root.bounds.min.y - max.y + epsilon;
+    } else if(min.y > root.bounds.max.y) {
+        displacement.y = root.bounds.max.y - min.y - epsilon;
     }
 
     if(displacement.x == 0 && displacement.y == 0) {
@@ -187,13 +189,13 @@ void Quadtree::addPoint(EntityId id, const Context &context) {
     if(position.x <= root.bounds.min.x) {
         displacement.x = root.bounds.min.x - position.x + epsilon;
     } else if(position.x > root.bounds.max.x) {
-        displacement.x = root.bounds.max.x - position.x;
+        displacement.x = root.bounds.max.x - position.x - epsilon;
     }
 
     if(position.y <= root.bounds.min.y) {
         displacement.y = root.bounds.min.y - position.y + epsilon;
     } else if(position.y > root.bounds.max.y) {
-        displacement.y = root.bounds.max.y - position.y;
+        displacement.y = root.bounds.max.y - position.y - epsilon;
     }
 
     if(displacement.x == 0 && displacement.y == 0) {

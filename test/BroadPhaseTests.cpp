@@ -59,7 +59,12 @@ TEST(BroadPhaseSystemTest, PotentialCollisions) {
         }
     }
 
+#ifdef USE_QUADTREE
+    auto *quadtree = new Quadtree({{-100, -100}, {100, 100}});
+    System *system = new BroadPhaseSystem(quadtree);
+#else
     System *system = new BroadPhaseSystem();
+#endif
     system->update(context, 1);
 
     for (int i = 0; i < ShapesCount; ++i) {

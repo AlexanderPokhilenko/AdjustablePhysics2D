@@ -5,6 +5,9 @@
 #include "ecs/systems/System.h"
 #include "ecs/systems/SystemType.h"
 #include "Entity.h"
+#ifdef USE_QUADTREE
+#include "common/Quadtree.h"
+#endif
 #include <functional>
 
 class PhysicsEngine {
@@ -19,7 +22,11 @@ public:
     static constexpr const real ThinSphereInertiaCoefficient = real(2) / real(3);
     static constexpr const real DefaultInertiaCoefficient = SolidSphereInertiaCoefficient;
 #endif
+#ifndef USE_QUADTREE
     explicit PhysicsEngine(size_t entitiesCapacity = 64, size_t freeCapacity = 16);
+#else
+    explicit PhysicsEngine(size_t entitiesCapacity = 64, size_t freeCapacity = 16, Quadtree *quadtree = nullptr, size_t quadtreeHardClearPeriod = 15);
+#endif
     void forEachEntity(const std::function<void(Entity&)>&);
     bool hasEntity(EntityId id);
     Entity getEntity(EntityId id);
