@@ -4,14 +4,14 @@
 #include "System.h"
 #ifdef USE_SWEEP_AND_PRUNE
 #include <map>
-#elif defined(USE_QUADTREE)
+#elif defined(USE_QUADTREE_FOR_BROADPHASE)
 #include "../../common/Quadtree.h"
 #endif
 #include <unordered_set>
 
 class BroadPhaseSystem : public System {
 private:
-#ifdef USE_QUADTREE
+#ifdef USE_QUADTREE_FOR_BROADPHASE
     Quadtree *const quadtree;
     const size_t hardClearPeriod;
     size_t iterationNumber;
@@ -66,7 +66,7 @@ public:
     void setArrayLength(size_t length);
 #elif defined(USE_SWEEP_AND_PRUNE)
     BroadPhaseSystem();
-#elif defined(USE_QUADTREE)
+#elif defined(USE_QUADTREE_FOR_BROADPHASE)
     BroadPhaseSystem(Quadtree *quadtree = nullptr, size_t hardClearPeriod = 15);
 #endif
     void update(Context &context, real deltaTime) override;

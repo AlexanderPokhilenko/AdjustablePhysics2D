@@ -6,6 +6,9 @@ Quadtree::Node::Node(AABB bounds, size_t capacity) : bounds(bounds), children{}
 #ifdef USE_CIRCLES_ONLY
 , radius(bounds.getHalfSize().getMagnitude()), center(bounds.getCenter())
 #endif
+#ifdef USE_BARNES_HUT
+, MultiBodyWithMass(0, bounds.getCenter())
+#endif
 {
     values.reserve(capacity);
     for(auto &child : children) child = nullptr;
@@ -67,6 +70,9 @@ void Quadtree::Node::addPoint(EntityId id, const Vector2& position, const Contex
     if(isLeaf()) {
         if(depth >= maxDepth || values.size() < threshold) {
             add(id);
+#ifdef USE_BARNES_HUT
+            addPointWithMass(id, context);
+#endif
             return;
         } else {
             createChildren();
@@ -75,24 +81,32 @@ void Quadtree::Node::addPoint(EntityId id, const Vector2& position, const Contex
 #endif
             for(auto oldId : values) {
                 const auto &oldPosition = context.getComponent<LocationComponent>(oldId).linear;
+                Node *child = nullptr;
                 if(oldPosition.x > center.x) { // East
                     if(oldPosition.y > center.y) { // North
-                        children[static_cast<size_t>(Direction::NorthEast)]->add(oldId);
+                        child = children[static_cast<size_t>(Direction::NorthEast)];
                     } else { // South
-                        children[static_cast<size_t>(Direction::SouthEast)]->add(oldId);
+                        child = children[static_cast<size_t>(Direction::SouthEast)];
                     }
                 } else { // West
                     if(oldPosition.y > center.y) { // North
-                        children[static_cast<size_t>(Direction::NorthWest)]->add(oldId);
+                        child = children[static_cast<size_t>(Direction::NorthWest)];
                     } else { // South
-                        children[static_cast<size_t>(Direction::SouthWest)]->add(oldId);
+                        child = children[static_cast<size_t>(Direction::SouthWest)];
                     }
                 }
+                child->add(oldId);
+#ifdef USE_BARNES_HUT
+                child->addPointWithMass(oldId, context);
+#endif
             }
             values.clear();
         }
     }
     for(auto &child : children) child->addPoint(id, position, context, threshold, maxDepth, depth + 1);
+#ifdef USE_BARNES_HUT
+    updateCenterOfMass();
+#endif
 }
 
 bool Quadtree::Node::removeShape(EntityId id) {
@@ -125,6 +139,22 @@ void Quadtree::Node::forEachLeaf(const std::function<void(std::vector<EntityId> 
         func(values);
     } else {
         for(const auto &child : children) child->forEachLeaf(func);
+    }
+}
+
+void Quadtree::Node::forEachLeaf(const std::function<void(Node const *)>&func) const {
+    if(isLeaf()) {
+        func(this);
+    } else {
+        for(const auto &child : children) child->forEachLeaf(func);
+    }
+}
+
+void Quadtree::Node::forFirstNodesWhere(const std::function<void(Node const *)> &func, const std::function<bool(Node const *)> &predicate) const {
+    if(predicate(this)) {
+        func(this);
+    } else if(!isLeaf()) {
+        for(const auto &child : children) child->forFirstNodesWhere(func, predicate);
     }
 }
 
@@ -204,24 +234,4 @@ void Quadtree::addPoint(EntityId id, const Context &context) {
         const auto newPosition = position + displacement;
         root.addPoint(id, newPosition, context, Threshold, MaxDepth);
     }
-}
-
-void Quadtree::removeShape(EntityId id) {
-    root.removeShape(id);
-}
-
-void Quadtree::removePoint(EntityId id) {
-    root.removePoint(id);
-}
-
-void Quadtree::forEachLeaf(const std::function<void(std::vector<EntityId> const &)> &func) const {
-    root.forEachLeaf(func);
-}
-
-void Quadtree::softClear() {
-    root.softClear();
-}
-
-void Quadtree::hardClear() {
-    root.hardClear();
 }

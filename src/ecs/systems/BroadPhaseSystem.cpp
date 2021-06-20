@@ -20,13 +20,13 @@ System(createCurrentSystemBitset()), arrayLength(length) {
 }
 #elif defined(USE_SWEEP_AND_PRUNE)
 BroadPhaseSystem::BroadPhaseSystem() : System(createCurrentSystemBitset()) { }
-#elif defined(USE_QUADTREE)
+#elif defined(USE_QUADTREE_FOR_BROADPHASE)
 BroadPhaseSystem::BroadPhaseSystem(Quadtree *quadtree, size_t hardClearPeriod) : System(createCurrentSystemBitset()),
 quadtree(quadtree != nullptr ? quadtree : new Quadtree({{-100, -100}, {100, 100}})), hardClearPeriod(hardClearPeriod), iterationNumber(0) { }
 #endif
 
 void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
-#ifndef USE_QUADTREE
+#ifndef USE_QUADTREE_FOR_BROADPHASE
     auto &shape = context.getComponent<ShapeComponent>(id);
 #endif
 #ifdef USE_SPATIAL_HASHING
@@ -53,7 +53,7 @@ void BroadPhaseSystem::update(Context &context, EntityId id, real deltaTime) {
     axisY.insert({shape.boundingBox.min.y, id});
     axisY.insert({shape.boundingBox.max.y, id});
 #endif
-#elif defined(USE_QUADTREE)
+#elif defined(USE_QUADTREE_FOR_BROADPHASE)
     quadtree->addShape(id, context);
 #elif defined(USE_BROAD_PHASE)
 #warning Broad phase is disabled!
@@ -196,7 +196,7 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
 #elif defined(USE_SWEEP_AND_PRUNE)
     axisX.clear();
     axisY.clear();
-#elif defined(USE_QUADTREE)
+#elif defined(USE_QUADTREE_FOR_BROADPHASE)
     if(iterationNumber >= hardClearPeriod) {
         quadtree->hardClear();
         iterationNumber = 0;
@@ -251,7 +251,7 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
             context.possibleCollisions.push_back(pair);
         }
     }
-#elif defined(USE_QUADTREE)
+#elif defined(USE_QUADTREE_FOR_BROADPHASE)
     unordered_pairs_set set;
     quadtree->forEachLeaf([&set](const std::vector<EntityId>& vec) {
         auto size = vec.size();
@@ -282,7 +282,7 @@ void BroadPhaseSystem::update(Context &context, real deltaTime) {
 BroadPhaseSystem::~BroadPhaseSystem() {
 #ifdef USE_SPATIAL_HASHING
     delete[] cells;
-#elif defined(USE_QUADTREE)
+#elif defined(USE_QUADTREE_FOR_BROADPHASE)
     delete quadtree;
 #endif
 }

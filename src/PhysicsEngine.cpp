@@ -33,15 +33,24 @@ systems() {
     systems[static_cast<std::size_t>(SystemType::GlobalGravitation)] = new GlobalGravitationSystem();
 #endif
 #ifdef USE_GRAVITATIONAL_FORCE
-    systems[static_cast<std::size_t>(SystemType::GravitationalForce)] = new GravitationalForceSystem();
+    systems[static_cast<std::size_t>(SystemType::GravitationalForce)] =
+#ifdef USE_BARNES_HUT
+#ifndef USE_QUADTREE_FOR_BROADPHASE
+            new GravitationalForceSystem(quadtree, quadtreeHardClearPeriod);
+#else
+            new GravitationalForceSystem(quadtree);
+#endif
+#else
+            new GravitationalForceSystem();
+#endif
 #endif
     systems[static_cast<std::size_t>(SystemType::ShapeTranslation)] = new ShapeTranslationSystem();
 #ifdef USE_BROAD_PHASE
-    systems[static_cast<std::size_t>(SystemType::BroadPhase)]
+    systems[static_cast<std::size_t>(SystemType::BroadPhase)] =
 #ifdef USE_QUADTREE
-            = new BroadPhaseSystem(quadtree, quadtreeHardClearPeriod);
+            new BroadPhaseSystem(quadtree, quadtreeHardClearPeriod);
 #else
-            = new BroadPhaseSystem();
+            new BroadPhaseSystem();
 #endif
 #endif
     systems[static_cast<std::size_t>(SystemType::NarrowPhase)] = new NarrowPhaseSystem();
